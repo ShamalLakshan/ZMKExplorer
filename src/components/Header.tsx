@@ -3,12 +3,12 @@ import {
   Keyboard,
   UploadCloud,
   GraduationCap,
-  Sparkles,
   GitFork,
   Palette,
   Volume2,
   VolumeX,
-  FileCode2
+  Sparkles,
+  Download
 } from 'lucide-react';
 import { ParsedKeymap, KeyboardLayoutData } from '../types';
 
@@ -22,6 +22,7 @@ interface HeaderProps {
   isCombosOpen: boolean;
   onOpenLayerFlow: () => void;
   onOpenThemeModal: () => void;
+  onOpenExportModal: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
 }
@@ -36,132 +37,122 @@ export const Header: React.FC<HeaderProps> = ({
   isCombosOpen,
   onOpenLayerFlow,
   onOpenThemeModal,
+  onOpenExportModal,
   soundEnabled,
   onToggleSound
 }) => {
   const layerCount = parsed?.layers.length || 0;
   const keyCount = layout?.keys.length || (parsed?.layers[0]?.keys.length || 0);
   const comboCount = parsed?.combos.length || 0;
-  const boardName = layout?.name || parsed?.sourceName || 'No Keymap';
+  const boardName = layout?.name || parsed?.sourceName || 'no keymap';
 
   return (
-    <header className="glass-panel" style={{
-      margin: '12px 18px 0',
-      padding: '12px 18px',
+    <header style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '14px',
-      flexWrap: 'wrap'
+      gap: '16px',
+      flexWrap: 'wrap',
+      padding: '4px 0 8px 0'
     }}>
       {/* Brand & Board Tag */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '10px',
-          background: 'var(--accent)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ffffff',
-          boxShadow: '0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent)'
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Keyboard size={20} style={{ color: 'var(--accent)' }} />
+        <h1 style={{
+          margin: 0,
+          fontSize: '18px',
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
+          color: 'var(--on-surface)',
+          textTransform: 'lowercase'
         }}>
-          <Keyboard size={22} />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h1 style={{
-              margin: 0,
-              fontSize: '17px',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              color: 'var(--text)'
-            }}>
-              ZMK Explorer
-            </h1>
-            <span style={{
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-              fontWeight: 600,
-              padding: '2px 8px',
-              borderRadius: '6px',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--accent-text)'
-            }}>
-              {boardName}
-            </span>
-          </div>
-          <div style={{
-            fontSize: '11.5px',
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-muted)',
-            marginTop: '1px'
-          }}>
-            {layerCount} layers · {keyCount} keys · {comboCount} combos
-            {layout?.sensors && layout.sensors.length > 0 && ` · ${layout.sensors.length} encoders`}
-          </div>
-        </div>
+          zmk explorer
+        </h1>
+        <span style={{
+          fontSize: '11px',
+          fontFamily: 'var(--font-mono)',
+          color: 'var(--text-muted)',
+          marginLeft: '4px'
+        }}>
+          {boardName.toLowerCase()} · {keyCount} keys
+          {layout?.sensors && layout.sensors.length > 0 && `+${layout.sensors.length}`}
+        </span>
       </div>
 
-      {/* Main Action Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Whisper-quiet Navigation Actions */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
         <button
           onClick={onOpenSourceDrawer}
           title="Upload or Paste Keymap (.keymap) & Layout (.json)"
-          style={{ gap: '6px' }}
+          className="zen-pill-btn"
+          style={{ padding: '4px 8px' }}
         >
-          <UploadCloud size={16} />
-          <span>Upload / Sources</span>
+          <UploadCloud size={15} />
+          <span>sources</span>
         </button>
 
         <button
           onClick={onToggleQuiz}
-          className={isQuizActive ? 'active-toggle' : ''}
-          title="Practice and test muscle memory"
-          style={{ gap: '6px' }}
+          className={`zen-pill-btn ${isQuizActive ? 'active-soft' : ''}`}
+          title="Toggle muscle memory quiz"
+          style={{ padding: '4px 8px' }}
         >
-          <GraduationCap size={16} />
-          <span>Quiz Mode</span>
+          <GraduationCap size={15} />
+          <span>quiz</span>
         </button>
 
         <button
           onClick={onToggleCombos}
-          className={isCombosOpen ? 'active-toggle' : ''}
+          className={`zen-pill-btn ${isCombosOpen ? 'active-soft' : ''}`}
           title="Inspect and visualize key combos"
-          style={{ gap: '6px' }}
+          style={{ padding: '4px 8px' }}
         >
-          <Sparkles size={16} />
-          <span>Combos ({comboCount})</span>
+          <Sparkles size={15} />
+          <span>combos ({comboCount})</span>
         </button>
 
         <button
           onClick={onOpenLayerFlow}
           title="View Layer map & Tri-layer dependencies"
-          style={{ gap: '6px' }}
+          className="zen-pill-btn"
+          style={{ padding: '4px 8px' }}
         >
-          <GitFork size={16} />
-          <span>Layer Map</span>
+          <GitFork size={15} />
+          <span>layer map</span>
         </button>
 
         <button
           onClick={onOpenThemeModal}
           title="Customize Theme, Pywal extraction & Wallpaper"
-          style={{ gap: '6px' }}
+          className="zen-pill-btn"
+          style={{ padding: '4px 8px' }}
         >
-          <Palette size={16} />
-          <span>Theme & Wallpaper</span>
+          <Palette size={15} />
+          <span>theme</span>
+        </button>
+
+        <button
+          onClick={onOpenExportModal}
+          title="Export Keymap as Wallpaper or Transparent PNG"
+          className="zen-pill-btn"
+          style={{ padding: '4px 8px' }}
+        >
+          <Download size={15} />
+          <span>export</span>
         </button>
 
         <button
           onClick={onToggleSound}
-          title={soundEnabled ? 'Mute mechanical keyboard sounds' : 'Enable mechanical keyboard sounds'}
-          style={{ padding: '7px 9px' }}
+          title={soundEnabled ? 'Mute keyboard sounds' : 'Enable keyboard sounds'}
+          className="zen-pill-btn"
+          style={{
+            padding: '4px 6px',
+            color: soundEnabled ? 'var(--accent-text)' : 'var(--text-muted)'
+          }}
         >
-          {soundEnabled ? <Volume2 size={16} style={{ color: 'var(--accent)' }} /> : <VolumeX size={16} />}
+          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
         </button>
-      </div>
+      </nav>
     </header>
   );
 };

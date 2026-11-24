@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Palette, Image as ImageIcon, Sun, Moon, Sparkles, Sliders, Check } from 'lucide-react';
+import { X, Palette, Image as ImageIcon, Sun, Moon, Sparkles, Check } from 'lucide-react';
 import { AppSettings, ThemeColors, ThemePreset } from '../types';
 import { extractPaletteFromImage, getPresetTheme } from '../utils/pywalExtractor';
 
@@ -12,7 +12,11 @@ interface ThemeSettingsModalProps {
 
 const PRESET_WALLPAPERS = [
   {
-    name: 'Cozy Lofi Desk',
+    name: 'Cozy Deskmat Zen',
+    url: 'https://lh3.googleusercontent.com/aida/ALJJyrBNGwV5xG0fc38DzlEJfRVjrh2LIhph5QW9GtbIpwVzu6yUWa2nwezS8ZMGm4h8WQRD4rYCX4kfYBsGIi-mxyQPIwXiwMVb1mh0iSmyTaSDI_6ggsfnV9ukEEEUh2uq0HRCo1JbN_JGZAte_lqmikGR-cEgppDBTiQqF36Hr-1ZzhjsnlBCBRQW8saykyMBU1NmyiYKwUXhiVqVMnVh6c9A04P74ymaTDJuX-jAsW3SyHOFfP_aRaBw'
+  },
+  {
+    name: 'Warm Lofi Study',
     url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1920&q=80'
   },
   {
@@ -20,11 +24,7 @@ const PRESET_WALLPAPERS = [
     url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80'
   },
   {
-    name: 'Warm Coffee Shop',
-    url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1920&q=80'
-  },
-  {
-    name: 'Minimal Dark Gradient',
+    name: 'Dark Minimalist',
     url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80'
   }
 ];
@@ -78,8 +78,9 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.65)',
-      backdropFilter: 'blur(6px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       zIndex: 100,
       display: 'flex',
       alignItems: 'center',
@@ -88,74 +89,79 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
     }}>
       <div className="glass-panel" style={{
         width: '100%',
-        maxWidth: '720px',
+        maxWidth: '700px',
         maxHeight: '90vh',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-        overflow: 'hidden'
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
+        overflow: 'hidden',
+        borderRadius: '16px',
+        border: '1px solid var(--border)'
       }}>
         {/* Header */}
         <div style={{
-          padding: '16px 20px',
+          padding: '14px 20px',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Palette size={20} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
-              Theme, Wallpaper & Pywal
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Palette size={18} style={{ color: 'var(--accent)' }} />
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--on-surface)' }}>
+              theme, wallpaper &amp; pywal
             </h2>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'transparent', border: 'none', padding: '6px', cursor: 'pointer' }}
+            className="zen-pill-btn"
+            style={{ padding: '4px' }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ padding: '18px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Light / Dark Mode Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '13.5px' }}>Appearance Mode</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Switch between dark and light tactile themes
+              <div style={{ fontWeight: 600, fontSize: '13px' }}>appearance mode</div>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                switch between dark and light tactile themes
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
+            <div className="zen-capsule" style={{ padding: '3px 6px', gap: '3px' }}>
               <button
-                className={!settings.isDarkMode ? 'active-toggle' : ''}
+                type="button"
+                className={`zen-pill-btn ${!settings.isDarkMode ? 'active' : ''}`}
                 onClick={() => onUpdateSettings({ isDarkMode: false })}
-                style={{ fontSize: '12.5px' }}
+                style={{ fontSize: '11px', padding: '3px 9px' }}
               >
-                <Sun size={15} />
-                <span>Light</span>
+                <Sun size={13} />
+                <span>light</span>
               </button>
               <button
-                className={settings.isDarkMode ? 'active-toggle' : ''}
+                type="button"
+                className={`zen-pill-btn ${settings.isDarkMode ? 'active' : ''}`}
                 onClick={() => onUpdateSettings({ isDarkMode: true })}
-                style={{ fontSize: '12.5px' }}
+                style={{ fontSize: '11px', padding: '3px 9px' }}
               >
-                <Moon size={15} />
-                <span>Dark</span>
+                <Moon size={13} />
+                <span>dark</span>
               </button>
             </div>
           </div>
 
           {/* Theme Presets */}
           <div>
-            <div style={{ fontWeight: 600, fontSize: '13.5px', marginBottom: '8px' }}>
-              Color Palettes
+            <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>
+              color palettes
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '6px' }}>
               {[
-                { id: 'cozy-latte', name: 'Cozy Latte' },
                 { id: 'cozy-dark', name: 'Cozy Dark' },
+                { id: 'cozy-latte', name: 'Cozy Latte' },
                 { id: 'nord', name: 'Nord Forest' },
                 { id: 'gruvbox', name: 'Gruvbox Warm' },
                 { id: 'catppuccin', name: 'Catppuccin' },
@@ -167,13 +173,16 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
                 return (
                   <button
                     key={preset.id}
+                    type="button"
                     onClick={() => onUpdateSettings({ themePreset: preset.id as ThemePreset })}
-                    className={isSelected ? 'active-toggle' : ''}
+                    className={`zen-pill-btn ${isSelected ? 'active' : ''}`}
                     style={{
                       justifyContent: 'center',
-                      padding: '8px',
-                      fontSize: '12px',
-                      fontWeight: isSelected ? 700 : 500
+                      padding: '7px 10px',
+                      fontSize: '11.5px',
+                      borderRadius: '8px',
+                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border)',
+                      background: isSelected ? 'var(--accent)' : 'color-mix(in srgb, var(--surface-2) 60%, transparent)'
                     }}
                   >
                     <span>{preset.name}</span>
@@ -185,44 +194,49 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
 
           {/* Background Image / Wallpaper */}
           <div>
-            <div style={{ fontWeight: 600, fontSize: '13.5px', marginBottom: '4px' }}>
-              Background Image via URL or Upload
+            <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '3px' }}>
+              background deskmat &amp; wallpaper
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-              Set a cozy wallpaper or deskmat photo
+            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              set a cozy deskmat photo or aesthetic background
             </div>
 
             {/* URL Input */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
               <input
                 type="url"
                 placeholder="Paste background image URL (https://...)"
                 value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
-                style={{ flex: 1, fontSize: '12.5px' }}
+                style={{ flex: 1, fontSize: '12px' }}
               />
-              <button className="primary" onClick={handleApplyUrl}>
-                Apply
+              <button type="button" className="primary" onClick={handleApplyUrl} style={{ padding: '5px 12px' }}>
+                apply
               </button>
               <button
+                type="button"
+                className="zen-pill-btn"
                 onClick={() => {
                   setUrlInput('');
                   onUpdateSettings({ bgImageUrl: '' });
                 }}
+                style={{ border: '1px solid var(--border)' }}
                 title="Remove wallpaper"
               >
-                Clear
+                clear
               </button>
             </div>
 
             {/* Local file upload or preset wallpapers */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
               <button
+                type="button"
+                className="zen-pill-btn"
                 onClick={() => document.getElementById('bg-file-input')?.click()}
-                style={{ fontSize: '12px' }}
+                style={{ border: '1px solid var(--border)', fontSize: '11.5px' }}
               >
-                <ImageIcon size={14} />
-                <span>Choose Local Image...</span>
+                <ImageIcon size={13} />
+                <span>choose local image...</span>
               </button>
               <input
                 id="bg-file-input"
@@ -238,11 +252,17 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
               {PRESET_WALLPAPERS.map(wp => (
                 <button
                   key={wp.name}
+                  type="button"
+                  className="zen-pill-btn"
                   onClick={() => {
                     setUrlInput(wp.url);
                     onUpdateSettings({ bgImageUrl: wp.url });
                   }}
-                  style={{ fontSize: '11px', padding: '4px 8px' }}
+                  style={{
+                    fontSize: '11px',
+                    padding: '3px 8px',
+                    border: '1px solid var(--border)'
+                  }}
                 >
                   {wp.name}
                 </button>
@@ -251,21 +271,21 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
 
             {/* Blur & Darken Sliders */}
             {settings.bgImageUrl && (
-              <div className="glass-card" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="glass-card" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Background Blur: {settings.bgBlur}px</span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Background Blur: {settings.bgBlur}px</span>
                   <input
                     type="range"
                     min={0}
                     max={25}
                     value={settings.bgBlur}
                     onChange={e => onUpdateSettings({ bgBlur: parseInt(e.target.value, 10) })}
-                    style={{ width: '140px', accentColor: 'var(--accent)' }}
+                    style={{ width: '130px', accentColor: 'var(--accent)' }}
                   />
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Darken Overlay: {Math.round(settings.bgDarken * 100)}%</span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Darken Overlay: {Math.round(settings.bgDarken * 100)}%</span>
                   <input
                     type="range"
                     min={0}
@@ -273,7 +293,7 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
                     step={0.05}
                     value={settings.bgDarken}
                     onChange={e => onUpdateSettings({ bgDarken: parseFloat(e.target.value) })}
-                    style={{ width: '140px', accentColor: 'var(--accent)' }}
+                    style={{ width: '130px', accentColor: 'var(--accent)' }}
                   />
                 </div>
               </div>
@@ -282,45 +302,46 @@ export const ThemeSettingsModal: React.FC<ThemeSettingsModalProps> = ({
 
           {/* Pywal Extract Button */}
           {settings.bgImageUrl && (
-            <div className="glass-card" style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="glass-card" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
               <div>
-                <div style={{ fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={15} style={{ color: 'var(--accent)' }} />
+                <div style={{ fontWeight: 600, fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} style={{ color: 'var(--accent)' }} />
                   <span>Pywal Color Extraction</span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Analyzes your wallpaper and dynamically extracts matching colors for keycaps, layers, accents, and surfaces!
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Dynamically extracts matching colors for keycaps, layers, accents, and surfaces from your deskmat!
                 </div>
               </div>
               <button
+                type="button"
                 className="primary"
                 onClick={handleExtractPywal}
                 disabled={extracting}
-                style={{ fontSize: '12px' }}
+                style={{ fontSize: '11.5px', padding: '5px 12px' }}
               >
-                {extracting ? 'Extracting Palette...' : 'Extract Colors (Pywal)'}
+                {extracting ? 'extracting...' : 'extract colors (pywal)'}
               </button>
             </div>
           )}
 
           {/* Live Palette Swatches */}
           <div>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '8px' }}>
-              Active Palette Swatches
+            <div style={{ fontSize: '10.5px', textTransform: 'lowercase', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '6px' }}>
+              active palette swatches
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {[
-                { label: 'BG', color: currentTheme.bg },
-                { label: 'Surface', color: currentTheme.surface },
-                { label: 'Accent', color: currentTheme.accent },
-                { label: 'Layer', color: currentTheme.layerBg },
-                { label: 'Mod', color: currentTheme.modBg },
-                { label: 'Key', color: currentTheme.keyBg }
+                { label: 'bg', color: currentTheme.bg },
+                { label: 'surface', color: currentTheme.surface },
+                { label: 'accent', color: currentTheme.accent },
+                { label: 'layer', color: currentTheme.layerBg },
+                { label: 'mod', color: currentTheme.modBg },
+                { label: 'key', color: currentTheme.keyBg }
               ].map(sw => (
                 <div key={sw.label} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
                   <div style={{
-                    width: '18px',
-                    height: '18px',
+                    width: '16px',
+                    height: '16px',
                     borderRadius: '4px',
                     backgroundColor: sw.color,
                     border: '1px solid var(--border)'

@@ -1,21 +1,22 @@
-/* Cozy Tactile Styling for ZMK Keymap & Layout Explorer */
+/* Monkeytype Zen & Cozy Tactile Styling for ZMK Keymap & Layout Explorer */
 
 :root {
-  --bg: #141518;
-  --surface: #1b1d22;
-  --surface-2: #242830;
-  --border: #2d333d;
-  --border-strong: #3f4756;
-  --text: #f0eee6;
-  --text-muted: #9c9990;
-  --text-faint: #636058;
+  --bg: #131417;
+  --surface: #1a1d22;
+  --surface-2: #22272e;
+  --border: #2e343d;
+  --border-strong: #414954;
+  --text: #eceae4;
+  --text-muted: #9b9991;
+  --text-faint: #63615b;
 
   --accent: #f97316;
-  --accent-soft: #381f13;
+  --accent-soft: #351e12;
   --accent-text: #fdba74;
+  --accent-glow: rgba(249, 115, 22, 0.38);
 
-  --layer-bg: #16263b;
-  --layer-border: #294c76;
+  --layer-bg: #17283c;
+  --layer-border: #2a4d74;
   --layer-text: #93c5fd;
 
   --mod-bg: #2d2417;
@@ -26,18 +27,68 @@
   --sys-border: #5e3a73;
   --sys-text: #d8b4fe;
 
-  --key-bg: #1e2229;
+  --key-bg: #1f2329;
   --key-shadow: #0d0f12;
-  --key-w: 66px;
-  --key-h: 62px;
-  --key-gap: 6px;
-  --radius: 10px;
+  --radius: 8px;
 
   --ok: #34d399;
   --err: #f87171;
 
+  /* Theme Aliases */
+  --on-bg: var(--text);
+  --on-surface: var(--text);
+  --on-surface-2: var(--text);
+  --on-layer-bg: var(--layer-text);
+  --on-mod-bg: var(--mod-text);
+  --on-sys-bg: var(--sys-text);
+  --on-key-bg: var(--text);
+  --on-accent: #ffffff;
+
   --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+[data-theme="light"] {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface-2: #ebe8e1;
+  --border: #d8d4c7;
+  --border-strong: #b8b2a2;
+  --text: #1c1b18;
+  --text-muted: #666359;
+  --text-faint: #999589;
+
+  --accent: #ea580c;
+  --accent-soft: #ffedd5;
+  --accent-text: #9a3412;
+  --accent-glow: rgba(234, 88, 12, 0.28);
+
+  --layer-bg: #e8eff8;
+  --layer-border: #8fb4e0;
+  --layer-text: #1e40af;
+
+  --mod-bg: #f8f1e6;
+  --mod-border: #d9c39e;
+  --mod-text: #78350f;
+
+  --sys-bg: #f4ecf8;
+  --sys-border: #cbaede;
+  --sys-text: #6b21a8;
+
+  --key-bg: #fdfdfb;
+  --key-shadow: #d2cec2;
+
+  --ok: #15803d;
+  --err: #b91c1c;
+
+  --on-bg: var(--text);
+  --on-surface: var(--text);
+  --on-surface-2: var(--text);
+  --on-layer-bg: var(--layer-text);
+  --on-mod-bg: var(--mod-text);
+  --on-sys-bg: var(--sys-text);
+  --on-key-bg: var(--text);
+  --on-accent: #ffffff;
 }
 
 * {
@@ -56,9 +107,15 @@ body {
   overflow-x: hidden;
   position: relative;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Background image backdrop with customizable blur & darken */
+::selection {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+/* Background image backdrop with customizable blur & darken (only active when wallpaper is set) */
 #bg-backdrop {
   position: fixed;
   inset: 0;
@@ -68,6 +125,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   transition: opacity 0.4s ease, filter 0.4s ease;
+  transform: scale(1.05);
 }
 
 #bg-overlay {
@@ -76,7 +134,7 @@ body {
   pointer-events: none;
   z-index: 0;
   background-color: var(--bg);
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, background-color 0.25s ease;
 }
 
 #root {
@@ -87,9 +145,60 @@ body {
   flex-direction: column;
 }
 
-/* Glassmorphic Surfaces */
+/* Zen Capsule Bars & Pill Buttons */
+.zen-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.zen-pill-btn {
+  appearance: none;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.zen-pill-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.zen-pill-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.zen-pill-btn.active-soft {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  font-weight: 600;
+}
+
+/* Glass Panels */
 .glass-panel {
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
@@ -97,36 +206,36 @@ body {
 }
 
 .glass-card {
-  background: color-mix(in srgb, var(--surface-2) 75%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
-/* Buttons & Inputs */
+/* Generic Button & Form Styles */
 button, .btn {
   appearance: none;
   background: color-mix(in srgb, var(--surface) 90%, transparent);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 12px;
-  font-size: 13px;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12px;
   font-family: var(--font-ui);
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 6px;
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
   user-select: none;
 }
 
 button:hover, .btn:hover {
   background: var(--surface-2);
   border-color: var(--border-strong);
-  transform: translateY(-1px);
+  color: var(--accent-text);
 }
 
 button:active, .btn:active {
@@ -143,6 +252,7 @@ button.primary {
 
 button.primary:hover {
   filter: brightness(1.1);
+  color: #ffffff;
   box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
@@ -154,15 +264,19 @@ button.active-toggle {
 }
 
 input[type="text"], input[type="url"], select, textarea {
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 12px;
+  border-radius: 9999px;
+  padding: 5px 12px;
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 12px;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+textarea {
+  border-radius: 10px;
 }
 
 input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus {
@@ -170,142 +284,146 @@ input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus 
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
-/* Mechanical Keycaps */
-.keycap {
+/* 3D Tactile Keycaps: completely responsive to active theme colors! */
+.keycap-3d {
   position: absolute;
-  width: var(--key-w);
-  height: var(--key-h);
+  border-radius: 8px;
   background: var(--key-bg);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 0 var(--key-shadow), 0 5px 9px rgba(0, 0, 0, 0.2);
-  padding: 4px 6px;
+  color: var(--text);
+  box-shadow: 0 4px 0 var(--key-shadow), 0 6px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding: 4px 4px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.12s ease, background 0.12s ease;
+  transition: transform 90ms cubic-bezier(0.2, 0, 0, 1), box-shadow 90ms cubic-bezier(0.2, 0, 0, 1), border-color 150ms ease, background 120ms ease;
   z-index: 2;
 }
 
-.keycap:hover {
-  border-color: var(--accent);
+.keycap-3d:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--key-shadow), 0 7px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 0 var(--key-shadow), 0 10px 20px rgba(0, 0, 0, 0.35);
+  border-color: var(--accent);
   z-index: 10;
 }
 
-.keycap:active {
+.keycap-3d:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--key-shadow), 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 0 var(--key-shadow);
 }
 
-.keycap.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent), 0 4px 0 var(--key-shadow);
+.keycap-3d.selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 0 var(--key-shadow), 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent) !important;
   z-index: 12;
 }
 
-.keycap.type-layer {
-  background: var(--layer-bg);
-  border-color: var(--layer-border);
+.keycap-3d.type-layer {
+  background: var(--layer-bg) !important;
+  border-color: var(--layer-border) !important;
+  color: var(--layer-text) !important;
 }
-.keycap.type-layer .k-tap, .keycap.type-layer .k-hold {
-  color: var(--layer-text);
+.keycap-3d.type-layer * {
+  color: var(--layer-text) !important;
 }
 
-.keycap.has-layer-hold .k-hold {
+.keycap-3d.has-layer-hold .k-hold {
   background: var(--layer-bg);
   border: 1px solid var(--layer-border);
   color: var(--layer-text);
 }
 
-.keycap.type-mod .k-hold, .keycap.type-mod-only {
-  background: var(--mod-bg);
-  border-color: var(--mod-border);
+.keycap-3d.type-mod, .keycap-3d.type-mod-only {
+  background: var(--mod-bg) !important;
+  border-color: var(--mod-border) !important;
+  color: var(--mod-text) !important;
 }
-.keycap.type-mod-only .k-tap, .keycap.type-mod .k-hold {
-  color: var(--mod-text);
-}
-
-.keycap.type-sys {
-  background: var(--sys-bg);
-  border-color: var(--sys-border);
-}
-.keycap.type-sys .k-tap {
-  color: var(--sys-text);
+.keycap-3d.type-mod *, .keycap-3d.type-mod-only * {
+  color: var(--mod-text) !important;
 }
 
-.keycap.type-trans {
-  background: transparent;
+.keycap-3d.type-sys {
+  background: var(--sys-bg) !important;
+  border-color: var(--sys-border) !important;
+  color: var(--sys-text) !important;
+}
+.keycap-3d.type-sys * {
+  color: var(--sys-text) !important;
+}
+
+.keycap-3d.type-trans {
+  background: transparent !important;
   border-style: dashed;
-  border-color: var(--border);
+  border-color: var(--border-strong) !important;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--key-shadow) 50%, transparent);
+  color: var(--text-faint) !important;
 }
-.keycap.type-trans .k-tap {
-  color: var(--text-faint);
-  opacity: 0.6;
+.keycap-3d.type-trans * {
+  color: var(--text-faint) !important;
 }
 
-.keycap.type-none {
-  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
-  border-color: var(--border);
-  opacity: 0.4;
+.keycap-3d.type-none {
+  background: color-mix(in srgb, var(--surface-2) 40%, transparent) !important;
+  border-color: var(--border) !important;
+  opacity: 0.35;
   box-shadow: none;
 }
 
-/* Rotary Encoder Keycap */
-.keycap.is-encoder {
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  background: radial-gradient(circle, var(--surface-2) 30%, var(--key-bg) 95%);
-  box-shadow: 0 4px 0 var(--key-shadow), 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.encoder-knob-indicator {
+/* Rotary Encoder Knob styling */
+.encoder-knob {
   position: absolute;
-  top: 4px;
-  width: 4px;
-  height: 9px;
-  background: var(--accent);
-  border-radius: 2px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  background: radial-gradient(circle at 35% 30%, #323742 0%, #1d2027 65%, #13151a 100%);
+  box-shadow: 0 5px 0 #0a0b0e, 0 10px 20px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  z-index: 2;
 }
 
-/* Layer change animation */
-@keyframes keyPop {
-  0% { transform: scale(0.92) translateY(2px); opacity: 0.7; }
-  60% { transform: scale(1.04) translateY(-1px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+.encoder-knob:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 7px 0 #0a0b0e, 0 14px 24px rgba(0, 0, 0, 0.55), 0 0 14px var(--accent-glow);
+  z-index: 10;
 }
 
-.key-morph {
-  animation: keyPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+.encoder-knob:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #0a0b0e;
 }
 
-/* Activator pulsing glow when looking at a layer */
+/* Held Activator Pulsing Halo */
 @keyframes pulseActivator {
   0%, 100% {
-    box-shadow: 0 0 0 2px var(--accent), 0 4px 0 var(--key-shadow);
+    box-shadow: 0 0 0 2px var(--accent), 0 5px 0 var(--key-shadow);
   }
   50% {
-    box-shadow: 0 0 16px 3px var(--accent), 0 4px 0 var(--key-shadow);
+    box-shadow: 0 0 18px 4px var(--accent), 0 5px 0 var(--key-shadow);
   }
 }
 
-.keycap.held-activator {
+.keycap-3d.held-activator {
   border-color: var(--accent) !important;
   background: var(--accent-soft) !important;
+  color: var(--accent-text) !important;
   animation: pulseActivator 2s infinite ease-in-out;
 }
 
-.keycap.held-activator::after {
+.keycap-3d.held-activator::after {
   content: "HELD";
   position: absolute;
-  bottom: -16px;
+  bottom: -15px;
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 700;
   color: var(--accent-text);
   letter-spacing: 0.05em;
@@ -316,51 +434,52 @@ input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus 
 }
 
 /* Search and Combo Highlights */
-.keycap.search-match {
-  background: #fef08a !important;
-  border-color: #ca8a04 !important;
-  color: #713f12 !important;
-}
-.keycap.search-match .k-tap, .keycap.search-match .k-hold {
-  color: #713f12 !important;
-}
-
-.keycap.combo-highlight {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 14px 2px var(--accent), 0 4px 0 var(--key-shadow) !important;
+.keycap-3d.is-combo-active {
   transform: translateY(-2px);
+  border-color: var(--accent) !important;
+  box-shadow: 0 7px 0 var(--key-shadow), 0 0 20px var(--accent-glow) !important;
   z-index: 15;
 }
 
-/* Blind quiz mode */
-.blind-mode .keycap .k-tap,
-.blind-mode .keycap .k-hold {
+.keycap-3d.is-search-match {
+  background-color: #fef08a !important;
+  color: #141518 !important;
+  border-color: #eab308 !important;
+}
+
+.keycap-3d.is-search-match * {
+  color: #141518 !important;
+}
+
+/* Blind Quiz Mode */
+.blind-mode .keycap-3d .k-tap,
+.blind-mode .keycap-3d .k-hold {
   opacity: 0.03;
 }
-.blind-mode .keycap.type-layer .k-tap,
-.blind-mode .keycap.has-layer-hold .k-hold,
-.blind-mode .keycap.held-activator .k-tap,
-.blind-mode .keycap.quiz-reveal .k-tap,
-.blind-mode .keycap.quiz-reveal .k-hold {
+.blind-mode .keycap-3d.type-layer .k-tap,
+.blind-mode .keycap-3d.has-layer-hold .k-hold,
+.blind-mode .keycap-3d.held-activator .k-tap,
+.blind-mode .keycap-3d.quiz-reveal .k-tap,
+.blind-mode .keycap-3d.quiz-reveal .k-hold {
   opacity: 1 !important;
 }
 
-.keycap.quiz-correct {
+.keycap-3d.quiz-correct {
   background: var(--ok) !important;
   border-color: var(--ok) !important;
   color: #ffffff !important;
 }
-.keycap.quiz-correct .k-tap, .keycap.quiz-correct .k-hold {
+.keycap-3d.quiz-correct * {
   color: #ffffff !important;
 }
 
-.keycap.quiz-wrong {
+.keycap-3d.quiz-wrong {
   background: var(--err) !important;
   border-color: var(--err) !important;
   color: #ffffff !important;
   animation: shakeKey 0.3s ease-in-out;
 }
-.keycap.quiz-wrong .k-tap, .keycap.quiz-wrong .k-hold {
+.keycap-3d.quiz-wrong * {
   color: #ffffff !important;
 }
 
@@ -372,8 +491,8 @@ input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus 
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

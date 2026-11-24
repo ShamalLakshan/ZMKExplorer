@@ -4,11 +4,11 @@ import { Header } from './components/Header';
 import { Toolbar } from './components/Toolbar';
 import { KeyboardStage } from './components/KeyboardStage';
 import { QuizBar } from './components/QuizBar';
-import { CombosPanel } from './components/CombosPanel';
-import { KeyInspector } from './components/KeyInspector';
+import { BottomDock } from './components/BottomDock';
 import { SourceDrawer } from './components/SourceDrawer';
 import { ThemeSettingsModal } from './components/ThemeSettingsModal';
 import { LayerFlowModal } from './components/LayerFlowModal';
+import { ImageExportModal } from './components/ImageExportModal';
 
 import {
   AppSettings,
@@ -23,25 +23,25 @@ import { parseZmkKeymap } from './utils/zmkParser';
 import { parseJsonLayout, generateHeuristicLayout } from './utils/layoutParser';
 import { applyThemeToCssVariables, getPresetTheme } from './utils/pywalExtractor';
 import { audio } from './utils/audio';
-import { BGKEEB_KEYMAP, BGKEEB_LAYOUT_JSON } from './utils/sampleData';
 
 const STORAGE_KEY_MAP = 'zmk_explorer_keymap_src_v2';
 const STORAGE_LAYOUT = 'zmk_explorer_layout_json_v2';
 const STORAGE_SETTINGS = 'zmk_explorer_settings_v2';
 const STORAGE_QUIZ = 'zmk_explorer_quiz_stats_v2';
 
+// Clean default settings: No wallpaper forced by default, preserving the pure theme aesthetic!
 const DEFAULT_SETTINGS: AppSettings = {
   themePreset: 'cozy-dark',
   isDarkMode: true,
-  bgImageUrl: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1920&q=80',
+  bgImageUrl: '', // Empty by default so authentic theme background shines through
   bgBlur: 10,
   bgDarken: 0.55,
-  layoutMode: 'json',
+  layoutMode: 'auto',
   staggered: true,
   showPosIndices: false,
   soundEnabled: true,
-  comboOverlayMode: 'hover',
-  keyUnitSize: 64
+  comboOverlayMode: 'all',
+  keyUnitSize: 62
 };
 
 export const App: React.FC = () => {
@@ -54,21 +54,27 @@ export const App: React.FC = () => {
     return DEFAULT_SETTINGS;
   });
 
-  // Source texts
+  // Source texts: No preloading of user files! If localStorage has old bgkeeb data, purge it.
   const [keymapSource, setKeymapSource] = useState<string>(() => {
     try {
       const s = localStorage.getItem(STORAGE_KEY_MAP);
-      if (s) return s;
+      if (s && !s.includes('bgkeeb') && !s.includes('Swweeep 36-key')) {
+        return s;
+      }
+      localStorage.removeItem(STORAGE_KEY_MAP);
     } catch (e) {}
-    return BGKEEB_KEYMAP;
+    return '';
   });
 
   const [layoutJson, setLayoutJson] = useState<string>(() => {
     try {
       const s = localStorage.getItem(STORAGE_LAYOUT);
-      if (s) return s;
+      if (s && !s.includes('bgkeeb')) {
+        return s;
+      }
+      localStorage.removeItem(STORAGE_LAYOUT);
     } catch (e) {}
-    return BGKEEB_LAYOUT_JSON;
+    return '';
   });
 
   // Core Parsed State
@@ -83,12 +89,13 @@ export const App: React.FC = () => {
   const [isSourceDrawerOpen, setIsSourceDrawerOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLayerFlowOpen, setIsLayerFlowOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isCombosPanelOpen, setIsCombosPanelOpen] = useState(true);
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Combos interaction
   const [activeCombo, setActiveCombo] = useState<ZmkCombo | null>(null);
-  const [showAllCombos, setShowAllCombos] = useState(false);
+  const [showAllCombos, setShowAllCombos] = useState(true);
 
   // Quiz state
   const [quizStatusMap, setQuizStatusMap] = useState<Record<number, 'correct' | 'wrong' | 'reveal'>>({});
@@ -129,60 +136,164 @@ export const App: React.FC = () => {
     } catch (e) {}
   }, [settings]);
 
-  // Initial Parse of Keymap and Layout
-  const applyKeymap = useCallback((src: string, name = 'Keymap') => {
-    try {
-      const p = parseZmkKeymap(src, name);
-      setParsed(p);
-      setKeymapSource(src);
-      setActiveLayer(0);
-      setSelectedKey(null);
-      setStatusMessage({
-        text: `Parsed "${name}" successfully (${p.layers.length} layers, ${p.layers[0]?.keys.length || 0} keys, ${p.combos.length} combos).`,
-        isError: false
-      });
+  // Unified source applicator (supports applying both keymap and layout JSON at once!)
+  const applySources = useCallback((sources: {
+    keymap?: { src: string; name?: string };
+    layout?: { json: string; name?: string };
+  }) => {
+    let keymapMsg = '';
+    let layoutMsg = '';
+    let hasKeymapError = false;
+    let hasLayoutError = false;
+
+    if (sources.layout && sources.layout.json.trim()) {
+      const name = sources.layout.name || 'JSON Layout';
       try {
-        localStorage.setItem(STORAGE_KEY_MAP, src);
-      } catch (e) {}
-      return p;
-    } catch (err: any) {
-      setStatusMessage({ text: `Keymap parse error: ${err.message}`, isError: true });
-      setIsSourceDrawerOpen(true);
-      return null;
+        const lay = parseJsonLayout(sources.layout.json, name);
+        setCustomJsonLayout(lay);
+        setLayoutJson(sources.layout.json);
+        layoutMsg = `layout "${lay.name}" (${lay.keys.length} keys)`;
+        try {
+          localStorage.setItem(STORAGE_LAYOUT, sources.layout.json);
+        } catch (e) {}
+      } catch (err: any) {
+        hasLayoutError = true;
+        setStatusMessage({ text: `Layout JSON error: ${err.message}`, isError: true });
+        setIsSourceDrawerOpen(true);
+      }
+    }
+
+    if (sources.keymap && sources.keymap.src.trim() && !hasLayoutError) {
+      const name = sources.keymap.name || 'Keymap';
+      try {
+        const p = parseZmkKeymap(sources.keymap.src, name);
+        setParsed(p);
+        setKeymapSource(sources.keymap.src);
+        setActiveLayer(0);
+        setSelectedKey(null);
+        keymapMsg = `keymap "${name}" (${p.layers.length} layers, ${p.combos.length} combos)`;
+        try {
+          localStorage.setItem(STORAGE_KEY_MAP, sources.keymap.src);
+        } catch (e) {}
+      } catch (err: any) {
+        hasKeymapError = true;
+        setStatusMessage({ text: `Keymap error: ${err.message}`, isError: true });
+        setIsSourceDrawerOpen(true);
+      }
+    }
+
+    if (!hasKeymapError && !hasLayoutError) {
+      if (keymapMsg && layoutMsg) {
+        setStatusMessage({
+          text: `Loaded both ${keymapMsg} and ${layoutMsg} successfully!`,
+          isError: false
+        });
+      } else if (keymapMsg) {
+        setStatusMessage({
+          text: `Loaded ${keymapMsg} successfully.`,
+          isError: false
+        });
+      } else if (layoutMsg) {
+        setStatusMessage({
+          text: `Loaded ${layoutMsg} successfully.`,
+          isError: false
+        });
+      }
     }
   }, []);
+
+  const applyKeymap = useCallback((src: string, name = 'Keymap') => {
+    applySources({ keymap: { src, name } });
+  }, [applySources]);
 
   const applyLayout = useCallback((jsonStr: string, name = 'JSON Layout') => {
-    try {
-      const lay = parseJsonLayout(jsonStr, name);
-      setCustomJsonLayout(lay);
-      setLayoutJson(jsonStr);
-      setStatusMessage({
-        text: `Loaded physical layout "${lay.name}" (${lay.keys.length} keys).`,
-        isError: false
+    applySources({ layout: { json: jsonStr, name } });
+  }, [applySources]);
+
+  // Parse on mount only if there is a saved keymap in localStorage
+  useEffect(() => {
+    if (keymapSource && layoutJson) {
+      applySources({
+        keymap: { src: keymapSource, name: 'Keymap' },
+        layout: { json: layoutJson, name: 'Layout' }
       });
-      try {
-        localStorage.setItem(STORAGE_LAYOUT, jsonStr);
-      } catch (e) {}
-      return lay;
-    } catch (err: any) {
-      setStatusMessage({ text: `Layout parse error: ${err.message}`, isError: true });
-      setIsSourceDrawerOpen(true);
-      return null;
+    } else if (keymapSource) {
+      applyKeymap(keymapSource, 'Keymap');
+    } else if (layoutJson) {
+      applyLayout(layoutJson, 'Layout');
     }
   }, []);
 
-  // Parse defaults on mount
+  // Global Drag & Drop listener for .keymap and .json files (supports importing both at once!)
   useEffect(() => {
-    applyKeymap(keymapSource, 'bgkeeb');
-    if (layoutJson) {
-      applyLayout(layoutJson, 'bgkeeb');
-    }
-  }, []);
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    const handleDrop = async (e: DragEvent) => {
+      e.preventDefault();
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length === 0) return;
+
+      const readFile = (file: File): Promise<{ file: File; content: string }> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve({ file, content: (ev.target?.result as string) || '' });
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+      };
+
+      try {
+        const results = await Promise.all(files.map(readFile));
+        let jsonItem = results.find(r => r.file.name.toLowerCase().endsWith('.json'));
+        let keymapItem = results.find(r => !r.file.name.toLowerCase().endsWith('.json'));
+
+        if (!jsonItem && results.length > 1) {
+          const possibleJson = results.find(item => {
+            try {
+              const p = JSON.parse(item.content);
+              return Boolean(p.layouts || p.keys || Array.isArray(p));
+            } catch {
+              return false;
+            }
+          });
+          if (possibleJson) {
+            jsonItem = possibleJson;
+            keymapItem = results.find(item => item !== possibleJson);
+          }
+        }
+
+        if (jsonItem && keymapItem) {
+          applySources({
+            keymap: { src: keymapItem.content, name: keymapItem.file.name },
+            layout: { json: jsonItem.content, name: jsonItem.file.name }
+          });
+        } else if (jsonItem) {
+          applySources({
+            layout: { json: jsonItem.content, name: jsonItem.file.name }
+          });
+        } else if (keymapItem) {
+          applySources({
+            keymap: { src: keymapItem.content, name: keymapItem.file.name }
+          });
+        }
+      } catch (err: any) {
+        setStatusMessage({ text: `Failed to read dropped files: ${err.message}`, isError: true });
+      }
+    };
+
+    window.addEventListener('dragover', handleDragOver);
+    window.addEventListener('drop', handleDrop);
+    return () => {
+      window.removeEventListener('dragover', handleDragOver);
+      window.removeEventListener('drop', handleDrop);
+    };
+  }, [applySources]);
 
   // Determine effective physical layout
-  const effectiveLayout = useMemo<KeyboardLayoutData>(() => {
-    const keyCount = parsed?.layers[0]?.keys.length || 38;
+  const effectiveLayout = useMemo<KeyboardLayoutData | null>(() => {
+    if (!parsed || parsed.layers.length === 0) return null;
+    const keyCount = parsed.layers[0]?.keys.length || 34;
 
     if (settings.layoutMode === 'json' && customJsonLayout) {
       return customJsonLayout;
@@ -233,7 +344,6 @@ export const App: React.FC = () => {
     });
 
     if (candidates.length === 0) {
-      // Fallback to all keys if category is empty
       currentParsed.layers.forEach((layer, lIdx) => {
         layer.keys.forEach(k => {
           if (k.type !== 'trans' && k.type !== 'none' && k.type !== 'layer' && k.tap) {
@@ -251,7 +361,6 @@ export const App: React.FC = () => {
 
     if (candidates.length === 0) return;
 
-    // Weight non-base layers higher (70%) to encourage layer switching muscle memory
     const nonBase = candidates.filter(c => c.layerIdx !== 0);
     const pool = (nonBase.length > 0 && Math.random() < 0.7) ? nonBase : candidates;
     const selected = pool[Math.floor(Math.random() * pool.length)];
@@ -271,7 +380,6 @@ export const App: React.FC = () => {
 
     // If Quiz is active
     if (quiz.active && quiz.target) {
-      // Allow navigation: If clicked key is a layer switch to another layer, switch layers!
       if (
         (key.type === 'layer' || key.type === 'layer-tap') &&
         key.targetLayer !== null &&
@@ -282,7 +390,6 @@ export const App: React.FC = () => {
         return;
       }
 
-      // Check guess
       const isExactPos = activeLayer === quiz.target.layerIdx && key.pos === quiz.target.pos;
       const isExactLabel = key.tap.toLowerCase() === quiz.target.label.toLowerCase() && key.type !== 'trans';
       const isCorrect = isExactPos || isExactLabel;
@@ -292,7 +399,6 @@ export const App: React.FC = () => {
         const newStreak = quiz.streak + 1;
         const newBest = Math.max(quiz.bestStreak, newStreak);
 
-        // Confetti on milestone streaks!
         if (newStreak === 5 || newStreak === 10 || newStreak === 25 || newStreak === 50) {
           confetti({
             particleCount: 50 + newStreak * 2,
@@ -368,36 +474,59 @@ export const App: React.FC = () => {
 
   // Load preset handler
   const handleLoadPreset = (keymap: string, layoutJsonStr: string, name: string) => {
-    applyKeymap(keymap, name);
     if (layoutJsonStr) {
-      applyLayout(layoutJsonStr, name);
+      applySources({
+        keymap: { src: keymap, name },
+        layout: { json: layoutJsonStr, name }
+      });
     } else {
       setCustomJsonLayout(null);
+      setLayoutJson('');
+      try {
+        localStorage.removeItem(STORAGE_LAYOUT);
+      } catch (e) {}
+      applyKeymap(keymap, name);
     }
     setIsSourceDrawerOpen(false);
   };
 
+  const currentInspectedKey = hoveredKey || selectedKey || (parsed?.layers[activeLayer]?.keys[0] || null);
+
   return (
     <>
-      {/* Background Image / Backdrop */}
+      {/* Background Image / Backdrop (ONLY active when wallpaper URL is set by user) */}
       {settings.bgImageUrl && (
-        <div
-          id="bg-backdrop"
-          style={{
-            backgroundImage: `url("${settings.bgImageUrl}")`,
-            filter: `blur(${settings.bgBlur}px)`
-          }}
-        />
+        <>
+          <div
+            id="bg-backdrop"
+            style={{
+              backgroundImage: `url("${settings.bgImageUrl}")`,
+              filter: `blur(${settings.bgBlur}px)`
+            }}
+          />
+          <div
+            id="bg-overlay"
+            style={{
+              opacity: settings.bgDarken
+            }}
+          />
+        </>
       )}
-      <div
-        id="bg-overlay"
-        style={{
-          opacity: settings.bgImageUrl ? settings.bgDarken : 1
-        }}
-      />
 
-      {/* Main App Canvas */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Main Shell */}
+      <div style={{
+        position: 'relative',
+        zIndex: 10,
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        maxWidth: '1160px',
+        margin: '0 auto',
+        padding: '16px 20px 24px 20px',
+        gap: '16px',
+        width: '100%'
+      }}>
         {/* Header */}
         <Header
           parsed={parsed}
@@ -417,119 +546,115 @@ export const App: React.FC = () => {
           isCombosOpen={isCombosPanelOpen}
           onOpenLayerFlow={() => setIsLayerFlowOpen(true)}
           onOpenThemeModal={() => setIsThemeModalOpen(true)}
+          onOpenExportModal={() => setIsExportModalOpen(true)}
           soundEnabled={settings.soundEnabled}
           onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
         />
 
-        {/* Toolbar */}
-        <div style={{ marginTop: '12px' }}>
-          <Toolbar
-            parsed={parsed}
-            layout={effectiveLayout}
-            activeLayer={activeLayer}
-            onSelectLayer={idx => {
-              audio.playLayerSwitch();
-              setActiveLayer(idx);
-            }}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            layoutMode={settings.layoutMode}
-            onLayoutModeChange={mode => setSettings(s => ({ ...s, layoutMode: mode }))}
-            hasCustomJsonLayout={customJsonLayout !== null}
-            staggered={settings.staggered}
-            onToggleStagger={() => setSettings(s => ({ ...s, staggered: !s.staggered }))}
-            showPosIndices={settings.showPosIndices}
-            onToggleShowPos={() => setSettings(s => ({ ...s, showPosIndices: !s.showPosIndices }))}
-            keyUnitSize={settings.keyUnitSize}
-            onKeyUnitSizeChange={size => setSettings(s => ({ ...s, keyUnitSize: size }))}
-          />
-        </div>
+        {/* Center Top: Mode & Layer Selector Stack */}
+        <Toolbar
+          parsed={parsed}
+          layout={effectiveLayout}
+          activeLayer={activeLayer}
+          onSelectLayer={idx => {
+            audio.playLayerSwitch();
+            setActiveLayer(idx);
+          }}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          layoutMode={settings.layoutMode}
+          onLayoutModeChange={mode => setSettings(s => ({ ...s, layoutMode: mode }))}
+          hasCustomJsonLayout={customJsonLayout !== null}
+          staggered={settings.staggered}
+          onToggleStagger={() => setSettings(s => ({ ...s, staggered: !s.staggered }))}
+          showPosIndices={settings.showPosIndices}
+          onToggleShowPos={() => setSettings(s => ({ ...s, showPosIndices: !s.showPosIndices }))}
+          keyUnitSize={settings.keyUnitSize}
+          onKeyUnitSizeChange={size => setSettings(s => ({ ...s, keyUnitSize: size }))}
+          isQuizActive={quiz.active}
+          onToggleQuiz={() => {
+            const nextActive = !quiz.active;
+            setQuiz(q => ({ ...q, active: nextActive }));
+            if (nextActive) pickQuizTarget();
+            else setQuizStatusMap({});
+          }}
+          isCombosOpen={isCombosPanelOpen}
+          onToggleCombos={() => setIsCombosPanelOpen(!isCombosPanelOpen)}
+          showAllCombos={showAllCombos}
+          onToggleShowAllCombos={() => setShowAllCombos(!showAllCombos)}
+        />
 
-        {/* Quiz Bar */}
-        <div style={{ marginTop: '10px' }}>
-          <QuizBar
-            quiz={quiz}
-            onToggleBlind={() => setQuiz(q => ({ ...q, blind: !q.blind }))}
-            onHint={() => {
-              if (!quiz.target) return;
-              setQuiz(q => ({
-                ...q,
-                feedback: {
-                  text: `Hint: Lives on Layer ${quiz.target!.layerIdx} ("${quiz.target!.layerName}") at position ${quiz.target!.pos}!`,
-                  type: 'hint'
-                }
-              }));
-            }}
-            onSkip={() => {
-              setQuiz(q => ({ ...q, streak: 0 }));
-              pickQuizTarget();
-            }}
-            onReset={() => {
-              setQuiz(q => ({ ...q, score: 0, total: 0, streak: 0 }));
-              pickQuizTarget();
-            }}
-            onChangeCategory={cat => {
-              setQuiz(q => ({ ...q, category: cat }));
-              pickQuizTarget(parsed, cat);
-            }}
-          />
-        </div>
+        {/* Conditional Quiz Bar */}
+        <QuizBar
+          quiz={quiz}
+          onToggleBlind={() => setQuiz(q => ({ ...q, blind: !q.blind }))}
+          onHint={() => {
+            if (!quiz.target) return;
+            setQuiz(q => ({
+              ...q,
+              feedback: {
+                text: `Hint: Lives on Layer ${quiz.target!.layerIdx} ("${quiz.target!.layerName}") at pos ${quiz.target!.pos}!`,
+                type: 'hint'
+              }
+            }));
+          }}
+          onSkip={() => {
+            setQuiz(q => ({ ...q, streak: 0 }));
+            pickQuizTarget();
+          }}
+          onReset={() => {
+            setQuiz(q => ({ ...q, score: 0, total: 0, streak: 0 }));
+            pickQuizTarget();
+          }}
+          onChangeCategory={cat => {
+            setQuiz(q => ({ ...q, category: cat }));
+            pickQuizTarget(parsed, cat);
+          }}
+        />
 
-        {/* Keyboard Stage */}
+        {/* Center: Borderless Floating Keyboard Stage or Welcome View */}
+        <KeyboardStage
+          parsed={parsed}
+          layout={effectiveLayout}
+          activeLayer={activeLayer}
+          selectedKeyPos={selectedKey?.pos ?? null}
+          onSelectKey={handleKeyClick}
+          onKeyHover={key => setHoveredKey(key)}
+          searchQuery={searchQuery}
+          showPosIndices={settings.showPosIndices}
+          keyUnitSize={settings.keyUnitSize}
+          activeCombo={activeCombo}
+          showAllCombos={showAllCombos}
+          quizStatusMap={quizStatusMap}
+          isBlindMode={quiz.active && quiz.blind}
+          onOpenSourceDrawer={() => setIsSourceDrawerOpen(true)}
+          onLoadSample={(sampleKeymap, name) => applyKeymap(sampleKeymap, name)}
+        />
+
+        {/* Bottom: Cozy Compact Dock (Key Inspector + Combo Chips) */}
         {parsed && (
-          <KeyboardStage
-            parsed={parsed}
-            layout={effectiveLayout}
-            activeLayer={activeLayer}
-            selectedKeyPos={selectedKey?.pos ?? null}
-            onSelectKey={handleKeyClick}
-            onKeyHover={key => setHoveredKey(key)}
-            searchQuery={searchQuery}
-            showPosIndices={settings.showPosIndices}
-            keyUnitSize={settings.keyUnitSize}
-            activeCombo={activeCombo}
-            showAllCombos={showAllCombos}
-            quizStatusMap={quizStatusMap}
-            isBlindMode={quiz.active && quiz.blind}
-          />
-        )}
-
-        {/* Bottom Details Grid: Inspector and Combos */}
-        <div style={{
-          margin: '0 18px 24px',
-          display: 'grid',
-          gridTemplateColumns: isCombosPanelOpen ? 'minmax(320px, 1.1fr) minmax(320px, 1.4fr)' : '1fr',
-          gap: '14px'
-        }}>
-          {/* Key Inspector */}
-          <KeyInspector
-            keyData={hoveredKey || selectedKey}
+          <BottomDock
+            keyData={currentInspectedKey}
             activeLayer={activeLayer}
             parsed={parsed}
             onJumpToLayer={idx => {
               audio.playLayerSwitch();
               setActiveLayer(idx);
             }}
+            combos={parsed.combos}
+            activeCombo={activeCombo}
+            onHoverCombo={setActiveCombo}
+            onClickCombo={c => {
+              setActiveCombo(c);
+              if (c.layers && c.layers.length > 0 && typeof c.layers[0] === 'number') {
+                setActiveLayer(c.layers[0]);
+              }
+            }}
+            showAllCombos={showAllCombos}
+            onToggleShowAllCombos={() => setShowAllCombos(!showAllCombos)}
+            isCombosOpen={isCombosPanelOpen}
           />
-
-          {/* Combos Panel */}
-          {isCombosPanelOpen && parsed && (
-            <CombosPanel
-              combos={parsed.combos}
-              activeCombo={activeCombo}
-              onHoverCombo={setActiveCombo}
-              onClickCombo={c => {
-                setActiveCombo(c);
-                if (c.layers && c.layers.length > 0 && typeof c.layers[0] === 'number') {
-                  setActiveLayer(c.layers[0]);
-                }
-              }}
-              showAllCombos={showAllCombos}
-              onToggleShowAllCombos={() => setShowAllCombos(!showAllCombos)}
-              activeLayer={activeLayer}
-            />
-          )}
-        </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -540,11 +665,12 @@ export const App: React.FC = () => {
         currentLayoutJson={layoutJson}
         onApplyKeymap={(src, name) => {
           applyKeymap(src, name);
-          setIsSourceDrawerOpen(false);
         }}
         onApplyLayout={(json, name) => {
           applyLayout(json, name);
-          setIsSourceDrawerOpen(false);
+        }}
+        onApplySources={(sources) => {
+          applySources(sources);
         }}
         onLoadPreset={handleLoadPreset}
         statusMessage={statusMessage}
@@ -567,7 +693,17 @@ export const App: React.FC = () => {
           setActiveLayer(idx);
         }}
       />
+
+      <ImageExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        parsed={parsed}
+        layout={effectiveLayout}
+        settings={settings}
+        activeLayer={activeLayer}
+      />
     </>
   );
 };
+
 export default App;

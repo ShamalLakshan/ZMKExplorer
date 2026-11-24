@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, SlidersHorizontal, Hash, ZoomIn } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Hash, ZoomIn, Sparkles, Compass, GraduationCap } from 'lucide-react';
 import { ParsedKeymap, KeyboardLayoutData } from '../types';
 
 interface ToolbarProps {
@@ -18,6 +18,12 @@ interface ToolbarProps {
   onToggleShowPos: () => void;
   keyUnitSize: number;
   onKeyUnitSizeChange: (size: number) => void;
+  isQuizActive: boolean;
+  onToggleQuiz: () => void;
+  isCombosOpen: boolean;
+  onToggleCombos: () => void;
+  showAllCombos: boolean;
+  onToggleShowAllCombos: () => void;
 }
 
 export function keyMatchesSearch(key: any, query: string): boolean {
@@ -46,99 +52,152 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   showPosIndices,
   onToggleShowPos,
   keyUnitSize,
-  onKeyUnitSizeChange
+  onKeyUnitSizeChange,
+  isQuizActive,
+  onToggleQuiz,
+  isCombosOpen,
+  onToggleCombos,
+  showAllCombos,
+  onToggleShowAllCombos
 }) => {
   const cleanQ = searchQuery.trim();
 
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      flexWrap: 'wrap',
-      margin: '0 18px'
+      justifyContent: 'center',
+      gap: '8px',
+      margin: '0 auto',
+      width: '100%'
     }}>
-      {/* Layer Tabs */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        flexWrap: 'wrap'
-      }}>
-        {parsed?.layers.map((layer, idx) => {
-          const isActive = idx === activeLayer;
-          const hasSearchMatch = cleanQ
-            ? layer.keys.some(k => keyMatchesSearch(k, cleanQ))
-            : false;
+      {/* 1. Mode Slider Capsule (Monkeytype Zen) */}
+      <div className="zen-capsule" style={{ padding: '3px 6px', gap: '4px' }}>
+        <button
+          type="button"
+          onClick={() => {
+            if (isQuizActive) onToggleQuiz();
+          }}
+          className={`zen-pill-btn ${!isQuizActive ? 'active' : ''}`}
+        >
+          <Compass size={13} />
+          <span>explore</span>
+        </button>
 
-          return (
-            <button
-              key={layer.index}
-              onClick={() => onSelectLayer(idx)}
-              className={isActive ? 'active-toggle' : ''}
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '12px',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: isActive ? '1px solid var(--accent)' : '1px solid var(--border)',
-                background: isActive ? 'var(--accent-soft)' : 'var(--surface)',
-                color: isActive ? 'var(--accent-text)' : 'var(--text)',
-                fontWeight: isActive ? 600 : 500,
-                position: 'relative'
-              }}
-            >
-              <span style={{
-                opacity: 0.6,
-                marginRight: '2px',
-                fontSize: '11px',
-                background: 'var(--surface-2)',
-                padding: '1px 5px',
-                borderRadius: '4px'
-              }}>
-                {idx + 1}
-              </span>
-              <span>{layer.name}</span>
-              {hasSearchMatch && (
-                <span
-                  title="Layer contains search match"
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: '#eab308',
-                    display: 'inline-block',
-                    marginLeft: '4px'
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
+        <button
+          type="button"
+          onClick={() => {
+            if (!isQuizActive) onToggleQuiz();
+          }}
+          className={`zen-pill-btn ${isQuizActive ? 'active' : ''}`}
+        >
+          <GraduationCap size={13} />
+          <span>quiz</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleCombos}
+          className={`zen-pill-btn ${isCombosOpen ? 'active' : ''}`}
+        >
+          <Sparkles size={13} />
+          <span>combos</span>
+        </button>
       </div>
 
-      {/* Controls: Search, Layout Selector, Stagger, Index, Zoom */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        {/* Search */}
+      {/* 2. Layer Switching & Controls Bar */}
+      <div
+        className="zen-capsule"
+        style={{
+          padding: '4px 10px',
+          gap: '6px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}
+      >
+        {/* Layer Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          {(!parsed || parsed.layers.length === 0) ? (
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', padding: '2px 8px' }}>
+              no keymap
+            </span>
+          ) : (
+            parsed.layers.map((layer, idx) => {
+              const isActive = idx === activeLayer;
+              const hasSearchMatch = cleanQ
+                ? layer.keys.some(k => keyMatchesSearch(k, cleanQ))
+                : false;
+
+              return (
+                <button
+                  key={layer.index}
+                  type="button"
+                  onClick={() => onSelectLayer(idx)}
+                  className={`zen-pill-btn ${isActive ? 'active' : ''}`}
+                  style={{
+                    padding: '3px 9px',
+                    position: 'relative'
+                  }}
+                >
+                  <span>{idx + 1} {layer.name.toLowerCase()}</span>
+                  {hasSearchMatch && (
+                    <span
+                      title="Layer contains search match"
+                      style={{
+                        width: '5px',
+                        height: '5px',
+                        borderRadius: '50%',
+                        backgroundColor: '#eab308',
+                        display: 'inline-block',
+                        marginLeft: '3px'
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Divider */}
+        <span style={{
+          width: '1px',
+          height: '14px',
+          backgroundColor: 'var(--border)',
+          margin: '0 4px',
+          display: 'inline-block'
+        }} />
+
+        {/* Inline Search */}
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <Search size={14} style={{
+          <Search size={12} style={{
             position: 'absolute',
-            left: '10px',
+            left: '8px',
             color: 'var(--text-muted)',
             pointerEvents: 'none'
           }} />
           <input
             type="text"
-            placeholder="Find key (e.g. {, ESC, Vol+)..."
+            placeholder="find key..."
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
             style={{
-              paddingLeft: '30px',
-              paddingRight: searchQuery ? '28px' : '10px',
-              width: '190px',
-              fontSize: '12.5px',
-              height: '34px'
+              paddingLeft: '24px',
+              paddingRight: searchQuery ? '22px' : '8px',
+              width: '105px',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              height: '24px',
+              border: 'none',
+              background: 'color-mix(in srgb, var(--bg) 75%, transparent)',
+              borderRadius: '9999px',
+              color: 'var(--on-surface)',
+              transition: 'width 0.2s ease'
+            }}
+            onFocus={e => e.target.style.width = '145px'}
+            onBlur={e => {
+              if (!searchQuery) e.target.style.width = '105px';
             }}
           />
           {searchQuery && (
@@ -149,80 +208,106 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 right: '4px',
                 background: 'transparent',
                 border: 'none',
-                padding: '4px',
+                padding: '2px',
                 color: 'var(--text-muted)',
                 cursor: 'pointer'
               }}
             >
-              <X size={14} />
+              <X size={12} />
             </button>
           )}
         </div>
 
-        {/* Layout Mode Selector */}
+        {/* Show All Chords Pill */}
+        <button
+          onClick={onToggleShowAllCombos}
+          className={`zen-pill-btn ${showAllCombos ? 'active-soft' : ''}`}
+          title="Toggle SVG curves for all combos"
+          style={{ padding: '3px 8px' }}
+        >
+          <Sparkles size={12} />
+          <span>chords</span>
+        </button>
+
+        {/* Divider */}
+        <span style={{
+          width: '1px',
+          height: '14px',
+          backgroundColor: 'var(--border)',
+          margin: '0 4px',
+          display: 'inline-block'
+        }} />
+
+        {/* Layout Mode Selector (Minimal pill) */}
         <select
           value={layoutMode}
           onChange={e => onLayoutModeChange(e.target.value)}
-          style={{ height: '34px', fontSize: '12px' }}
+          style={{
+            height: '24px',
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-muted)',
+            cursor: 'pointer'
+          }}
           title="Physical layout projection"
         >
           {hasCustomJsonLayout && (
-            <option value="json">★ Uploaded JSON Layout</option>
+            <option value="json">★ json layout</option>
           )}
-          <option value="auto">Auto Detect Layout</option>
-          <option value="split-34">Split 34-key (3x5+2)</option>
-          <option value="split-36">Split 36-key (3x5+3)</option>
-          <option value="split-38">Split 38-key (3x5+4 / Encoders)</option>
-          <option value="split-42">Split 42-key (3x6+3)</option>
-          <option value="split-58">Split 58-key (4x6+5)</option>
-          <option value="grid-10">10-Column Grid</option>
-          <option value="grid-12">12-Column Grid</option>
+          <option value="auto">auto geometry</option>
+          <option value="split-34">split 34k (3x5+2)</option>
+          <option value="split-36">split 36k (3x5+3)</option>
+          <option value="split-38">split 38k (3x5+4)</option>
+          <option value="split-42">split 42k (3x6+3)</option>
+          <option value="split-58">split 58k (4x6+5)</option>
+          <option value="grid-10">10-col grid</option>
+          <option value="grid-12">12-col grid</option>
         </select>
 
-        {/* Column Stagger Button */}
+        {/* Stagger Toggle */}
         <button
           onClick={onToggleStagger}
-          className={staggered ? 'active-toggle' : ''}
+          className={`zen-pill-btn ${staggered ? 'active-soft' : ''}`}
           title="Toggle column stagger offset"
-          style={{ height: '34px', padding: '0 10px' }}
+          style={{ padding: '3px 8px' }}
         >
-          <SlidersHorizontal size={14} />
-          <span>Stagger</span>
+          <SlidersHorizontal size={12} />
+          <span>stagger</span>
         </button>
 
-        {/* Pos # Indices Button */}
+        {/* Pos # Toggle */}
         <button
           onClick={onToggleShowPos}
-          className={showPosIndices ? 'active-toggle' : ''}
-          title="Show key index numbers"
-          style={{ height: '34px', padding: '0 10px' }}
+          className={`zen-pill-btn ${showPosIndices ? 'active-soft' : ''}`}
+          title="Toggle key position indices"
+          style={{ padding: '3px 8px' }}
         >
-          <Hash size={14} />
-          <span>Pos #</span>
+          <Hash size={12} />
+          <span>pos</span>
         </button>
 
-        {/* Key Size Slider */}
+        {/* Key Size Zoom Slider */}
         <div
-          title={`Keycap scale: ${keyUnitSize}px`}
+          title={`Scale: ${keyUnitSize}px`}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '0 8px',
-            height: '34px'
+            gap: '4px',
+            padding: '0 4px'
           }}
         >
-          <ZoomIn size={14} style={{ color: 'var(--text-muted)' }} />
+          <ZoomIn size={12} style={{ color: 'var(--text-muted)' }} />
           <input
             type="range"
             min={48}
-            max={80}
+            max={76}
             value={keyUnitSize}
             onChange={e => onKeyUnitSizeChange(parseInt(e.target.value, 10))}
-            style={{ width: '60px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+            style={{ width: '48px', accentColor: 'var(--accent)', cursor: 'pointer' }}
           />
         </div>
       </div>

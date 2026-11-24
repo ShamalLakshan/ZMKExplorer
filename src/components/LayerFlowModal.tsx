@@ -23,8 +23,9 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.65)',
-      backdropFilter: 'blur(6px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       zIndex: 100,
       display: 'flex',
       alignItems: 'center',
@@ -33,66 +34,68 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
     }}>
       <div className="glass-panel" style={{
         width: '100%',
-        maxWidth: '780px',
+        maxWidth: '760px',
         maxHeight: '90vh',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-        overflow: 'hidden'
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
+        overflow: 'hidden',
+        borderRadius: '16px',
+        border: '1px solid var(--border)'
       }}>
         {/* Header */}
         <div style={{
-          padding: '16px 20px',
+          padding: '14px 20px',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <GitFork size={20} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
-              Layer Flow & Conditional Layers
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <GitFork size={18} style={{ color: 'var(--accent)' }} />
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--on-surface)' }}>
+              layer flow &amp; conditional layers
             </h2>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'transparent', border: 'none', padding: '6px', cursor: 'pointer' }}
+            className="zen-pill-btn"
+            style={{ padding: '4px' }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ padding: '18px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Conditional / Tri-layers Section */}
           <div>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 700,
-              textTransform: 'uppercase',
               fontFamily: 'var(--font-mono)',
               color: 'var(--accent-text)',
-              marginBottom: '10px'
+              marginBottom: '8px'
             }}>
-              <Zap size={15} />
-              <span>Conditional (Tri-Layers) Rules</span>
+              <Zap size={14} />
+              <span>conditional (tri-layers) rules</span>
             </div>
 
             {parsed.conditionalLayers.length === 0 ? (
-              <div className="glass-card" style={{ padding: '12px', fontSize: '12.5px', color: 'var(--text-muted)' }}>
+              <div className="glass-card" style={{ padding: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
                 No <code>conditional_layers</code> defined in this keymap file.
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {parsed.conditionalLayers.map(cl => (
                   <div
                     key={cl.name}
                     className="glass-card"
                     style={{
-                      padding: '12px 16px',
+                      padding: '10px 14px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -100,21 +103,22 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
                       flexWrap: 'wrap'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text)' }}>
-                        Rule: <span style={{ color: 'var(--accent)' }}>{cl.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                        rule: <span style={{ color: 'var(--accent)' }}>{cl.name}</span>
                       </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {cl.ifLayers.map((l, i) => (
                           <React.Fragment key={l}>
-                            {i > 0 && <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>+</span>}
+                            {i > 0 && <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '11px' }}>+</span>}
                             <span style={{
                               background: 'var(--surface)',
                               border: '1px solid var(--border)',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
+                              padding: '2px 7px',
+                              borderRadius: '9999px',
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '11.5px'
+                              fontSize: '11px',
+                              color: 'var(--on-surface)'
                             }}>
                               {l}
                             </span>
@@ -123,25 +127,23 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <ArrowRight size={16} style={{ color: 'var(--accent)' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ArrowRight size={14} style={{ color: 'var(--accent)' }} />
                       <button
+                        type="button"
                         onClick={() => {
                           if (cl.thenLayerIndex !== null) {
                             onSelectLayer(cl.thenLayerIndex);
                             onClose();
                           }
                         }}
+                        className="zen-pill-btn active-soft"
                         style={{
-                          background: 'var(--layer-bg)',
-                          border: '1px solid var(--layer-border)',
-                          color: 'var(--layer-text)',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          padding: '4px 10px'
+                          fontSize: '11.5px',
+                          padding: '3px 10px'
                         }}
                       >
-                        Activates Layer: {cl.thenLayer}
+                        activates layer: {cl.thenLayer}
                       </button>
                     </div>
                   </div>
@@ -156,18 +158,17 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 700,
-              textTransform: 'uppercase',
               fontFamily: 'var(--font-mono)',
               color: 'var(--text-muted)',
-              marginBottom: '10px'
+              marginBottom: '8px'
             }}>
-              <Layers size={15} />
-              <span>All Layers & Activators</span>
+              <Layers size={14} />
+              <span>all layers &amp; activators</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
               {parsed.layers.map((layer, idx) => {
                 const isActive = idx === activeLayer;
                 const activators = parsed.layerActivators[idx] || [];
@@ -181,40 +182,40 @@ export const LayerFlowModal: React.FC<LayerFlowModalProps> = ({
                     }}
                     className="glass-card"
                     style={{
-                      padding: '14px',
+                      padding: '12px 14px',
                       cursor: 'pointer',
-                      border: isActive ? '1.5px solid var(--accent)' : '1px solid var(--border)',
-                      background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                      border: isActive ? '1px solid var(--accent)' : '1px solid var(--border)',
+                      background: isActive ? 'var(--accent-soft)' : 'color-mix(in srgb, var(--surface-2) 65%, transparent)',
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                       <span style={{
-                        fontSize: '11px',
+                        fontSize: '10.5px',
                         fontFamily: 'var(--font-mono)',
                         background: 'var(--surface)',
                         padding: '1px 6px',
                         borderRadius: '4px',
                         color: 'var(--text-muted)'
                       }}>
-                        Layer {idx}
+                        layer {idx}
                       </span>
                       {isActive && (
-                        <span style={{ fontSize: '10px', color: 'var(--accent)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ fontSize: '9.5px', color: 'var(--accent)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                           ACTIVE
                         </span>
                       )}
                     </div>
 
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text)', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--on-surface)', marginBottom: '4px' }}>
                       {layer.name}
                     </div>
 
-                    <div style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
                       {idx === 0 ? (
-                        <span>Default Base Layer</span>
+                        <span>default base layer</span>
                       ) : (
-                        <span>Activated by {activators.length} key position(s) [{activators.join(', ')}]</span>
+                        <span>activated by {activators.length} key position(s) [{activators.join(', ')}]</span>
                       )}
                     </div>
                   </div>

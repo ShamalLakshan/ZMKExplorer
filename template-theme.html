@@ -1,0 +1,596 @@
+<!DOCTYPE html><html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZMK Explorer — Monkeytype Zen</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'bg': '#141518',
+        'on-bg': '#f0eee6',
+        'surface': '#1b1d22',
+        'on-surface': '#f0eee6',
+        'surface-2': '#242830',
+        'on-surface-2': '#f0eee6',
+        'border': '#2d333d',
+        'border-strong': '#3f4756',
+        'text-muted': '#9c9990',
+        'text-faint': '#636058',
+        'accent': '#f97316',
+        'on-accent': '#141518',
+        'accent-soft': '#381f13',
+        'on-accent-soft': '#fdba74',
+        'accent-text': '#fdba74',
+        'layer-bg': '#16263b',
+        'on-layer-bg': '#93c5fd',
+        'layer-border': '#294c76',
+        'mod-bg': '#2d2417',
+        'on-mod-bg': '#fcd34d',
+        'mod-border': '#5b4421',
+        'sys-bg': '#2b1c34',
+        'on-sys-bg': '#d8b4fe',
+        'sys-border': '#5e3a73',
+        'key-bg': '#1e2229',
+        'on-key-bg': '#f0eee6',
+        'key-shadow': '#0d0f12',
+        'ok': '#34d399',
+        'on-ok': '#0b241a',
+        'err': '#f87171',
+        'on-err': '#2d0b0b',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '40px',
+        'page-margin': '24px',
+      },
+      fontFamily: {
+        'display': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'headline': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'title': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'body': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'label': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '42px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'display-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'title-sm': ['15px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['12px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-sm': ['11px', { lineHeight: '16px', letterSpacing: '0.3px', fontWeight: '600' }],
+        'mono-lg': ['14px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '700' }],
+        'mono-md': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '600' }],
+        'mono-sm': ['10px', { lineHeight: '14px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'key-press': '90ms',
+        'state-change': '150ms',
+        'surface-enter': '240ms',
+      },
+      transitionDelay: {
+        'key-press': '0ms',
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'key-press': 'cubic-bezier(0.2, 0, 0, 1)',
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined { display: inline-block; width: 1em; height: 1em; line-height: 1 !important; box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle; }
+    :root { --key-shadow: #0d0f12; --accent-glow: rgba(249, 115, 22, 0.38); }
+    .keycap-3d {
+      box-shadow: 0 5px 0 var(--key-shadow), 0 8px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
+      transition: transform 90ms cubic-bezier(0.2,0,0,1), box-shadow 90ms cubic-bezier(0.2,0,0,1), border-color 150ms ease;
+    }
+    .keycap-3d:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--key-shadow), 0 12px 22px rgba(0,0,0,0.42); }
+    .keycap-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--key-shadow); }
+    .keycap-3d.is-combo-active { transform: translateY(-2px); border-color: #f97316 !important; box-shadow: 0 7px 0 var(--key-shadow), 0 0 20px var(--accent-glow); }
+    .keycap-3d.is-search-match { background-color: #fef08a !important; color: #141518 !important; border-color: #eab308 !important; }
+    .keycap-3d.is-search-match * { color: #141518 !important; }
+    .encoder-knob {
+      background: radial-gradient(circle at 35% 30%, #323742 0%, #1d2027 65%, #13151a 100%);
+      box-shadow: 0 5px 0 #0a0b0e, 0 10px 20px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.12);
+      transition: transform 150ms ease;
+    }
+    .encoder-knob:hover { transform: translateY(-2px); }
+    .encoder-knob:active { transform: translateY(3px); }
+  </style>
+</head>
+<body class="bg-bg text-on-bg font-body antialiased selection:bg-accent selection:text-on-accent overflow-x-hidden">
+
+  <!-- Cozy Deskmat Backdrop -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <img src="https://lh3.googleusercontent.com/aida/ALJJyrBNGwV5xG0fc38DzlEJfRVjrh2LIhph5QW9GtbIpwVzu6yUWa2nwezS8ZMGm4h8WQRD4rYCX4kfYBsGIi-mxyQPIwXiwMVb1mh0iSmyTaSDI_6ggsfnV9ukEEEUh2uq0HRCo1JbN_JGZAte_lqmikGR-cEgppDBTiQqF36Hr-1ZzhjsnlBCBRQW8saykyMBU1NmyiYKwUXhiVqVMnVh6c9A04P74ymaTDJuX-jAsW3SyHOFfP_aRaBw" alt="Cozy mechanical keyboard deskmat" class="w-full h-full object-cover scale-105 blur-[16px] opacity-30">
+    <div class="absolute inset-0 bg-bg/80"></div>
+  </div>
+
+  <!-- Monkeytype Zen Shell: Generous whitespace, no heavy boxes around the board -->
+  <div class="relative z-10 min-h-[1024px] flex flex-col justify-between max-w-[1160px] mx-auto px-gutter-xl py-gutter-lg gap-gutter-lg" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- WHISPER-QUIET MONKEYTYPE HEADER -->
+    <header class="flex flex-wrap items-center justify-between gap-gutter-md">
+      <div class="flex items-center gap-gutter-sm">
+        <span class="material-symbols-outlined text-headline-md text-accent" aria-hidden="true">keyboard</span>
+        <h1 data-design-text-token="headline-md" class="font-headline text-headline-md text-on-surface">zmk explorer</h1>
+        <span data-design-text-token="mono-sm" class="font-mono text-mono-sm text-text-muted ml-2">bgkeeb · 36+2</span>
+      </div>
+
+      <nav aria-label="Zen actions" class="flex items-center gap-gutter-md text-text-muted">
+        <button type="button" class="inline-flex items-center gap-1 hover:text-accent-text transition-colors font-label text-label-sm">
+          <span class="material-symbols-outlined text-body-md" aria-hidden="true">cloud_upload</span>
+          <span>sources</span>
+        </button>
+        <button id="btn-toggle-quiz" type="button" class="inline-flex items-center gap-1 hover:text-accent-text transition-colors font-label text-label-sm">
+          <span class="material-symbols-outlined text-body-md" aria-hidden="true">school</span>
+          <span>quiz</span>
+        </button>
+        <button type="button" class="inline-flex items-center gap-1 hover:text-accent-text transition-colors font-label text-label-sm">
+          <span class="material-symbols-outlined text-body-md" aria-hidden="true">account_tree</span>
+          <span>layer map</span>
+        </button>
+        <button type="button" class="inline-flex items-center gap-1 hover:text-accent-text transition-colors font-label text-label-sm">
+          <span class="material-symbols-outlined text-body-md" aria-hidden="true">palette</span>
+          <span>theme</span>
+        </button>
+        <button id="btn-toggle-sound" type="button" aria-label="Toggle switch sound" class="inline-flex items-center text-accent-text hover:opacity-80 transition-opacity">
+          <span id="sound-icon" class="material-symbols-outlined text-title-sm" aria-hidden="true">volume_up</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- CENTERED MONKEYTYPE-STYLE MODE + LAYER SELECTOR STACK -->
+    <div class="flex flex-col items-center justify-center gap-gutter-xs">
+      <!-- Mode Slider (On top of layer selector) -->
+      <div id="mode-tablist" role="tablist" aria-label="Workspace modes" class="inline-flex items-center gap-gutter-xs p-1 rounded-full bg-surface/85 backdrop-blur-md border border-border">
+        <button type="button" role="tab" data-mode="explore" aria-selected="true" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-on-accent font-mono text-mono-sm transition-colors">
+          <span class="material-symbols-outlined text-body-sm" aria-hidden="true">explore</span>
+          <span>explore</span>
+        </button>
+        <button type="button" role="tab" data-mode="quiz" aria-selected="false" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-text-muted hover:text-on-surface font-mono text-mono-sm transition-colors">
+          <span class="material-symbols-outlined text-body-sm" aria-hidden="true">school</span>
+          <span>quiz</span>
+        </button>
+        <button type="button" role="tab" data-mode="combos" aria-selected="false" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-text-muted hover:text-on-surface font-mono text-mono-sm transition-colors">
+          <span class="material-symbols-outlined text-body-sm" aria-hidden="true">auto_awesome</span>
+          <span>combos</span>
+        </button>
+      </div>
+
+      <!-- Layer Switching Selector -->
+      <div class="inline-flex flex-wrap items-center gap-gutter-xs px-gutter-sm py-1.5 rounded-full bg-surface/85 backdrop-blur-md border border-border">
+        <div id="layer-tablist" role="tablist" aria-label="Keyboard layers" class="flex items-center gap-gutter-xs">
+          <!-- Populated by JS -->
+        </div>
+
+        <span class="w-px h-4 bg-border mx-1 hidden sm:inline-block"></span>
+
+        <div class="relative flex items-center">
+          <span class="material-symbols-outlined text-body-sm text-text-muted absolute left-2 pointer-events-none" aria-hidden="true">search</span>
+          <input id="key-search-input" type="text" placeholder="find key..." aria-label="Search keycodes" class="w-32 pl-6 pr-2 py-0.5 rounded-full bg-bg/60 border border-transparent text-on-surface placeholder:text-text-muted font-mono text-mono-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus:border-accent">
+        </div>
+
+        <button id="btn-show-all-chords" type="button" aria-pressed="true" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent-soft text-accent-text font-label text-label-sm">
+          <span class="material-symbols-outlined text-body-sm" aria-hidden="true">auto_awesome</span>
+          <span>chords</span>
+        </button>
+      </div>
+
+      <!-- Conditional Quiz Mode Strip (Revealed when Quiz mode is active) -->
+      <div id="zen-quiz-strip" class="hidden items-center gap-gutter-md px-gutter-md py-1.5 rounded-full bg-accent-soft/90 border border-accent/60 font-mono text-mono-sm text-accent-text">
+        <span>find &amp; press: <strong class="px-2 py-0.5 rounded bg-surface text-on-surface border border-accent ml-1">{</strong></span>
+        <span class="text-text-muted">14/15 (93%)</span>
+        <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-body-sm text-accent" aria-hidden="true">local_fire_department</span>6</span>
+      </div>
+    </div>
+
+    <!-- BORDERLESS FLOATING KEYBOARD STAGE -->
+    <main class="flex flex-col items-center justify-center py-gutter-md gap-gutter-md">
+      <div class="w-full overflow-x-auto flex justify-center py-gutter-sm">
+        <div id="keyboard-canvas" class="relative select-none" style="width: 840px; height: 340px;">
+          <div id="keys-layer" class="absolute inset-0"></div>
+          <svg id="combos-svg" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div id="combos-pills-layer" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <!-- Whisper-quiet Encoder & Layer Caption -->
+      <div class="flex flex-wrap items-center justify-center gap-gutter-md font-mono text-mono-sm text-text-muted">
+        <span id="stage-layer-title" class="text-accent-text">layer 0 · default</span>
+        <span>·</span>
+        <span id="encoder-status-text">encoders: vol± | next/prev</span>
+      </div>
+    </main>
+
+    <!-- COZY COMPACT BOTTOM DOCK: Inline Inspector Strip + Combo Chips -->
+    <footer class="rounded-xl bg-surface/80 backdrop-blur-md border border-border px-gutter-lg py-gutter-md flex flex-col gap-gutter-sm">
+      <!-- Top Row: Live Key Inspector Pill Strip -->
+      <div class="flex flex-wrap items-center justify-between gap-gutter-md pb-gutter-sm border-b border-border/60">
+        <div class="flex flex-wrap items-center gap-gutter-md">
+          <span id="inspector-pos-badge" class="font-mono text-mono-sm px-2.5 py-0.5 rounded-full bg-layer-bg text-on-layer-bg border border-layer-border">Default · Pos 31</span>
+          <span id="inspector-taphold" class="font-mono text-mono-md text-on-mod-bg">Super / ◆ Super</span>
+          <code id="inspector-raw" class="font-mono text-mono-sm text-text-muted">&amp;kp LGUI</code>
+        </div>
+        <span id="inspector-behavior" class="text-body-sm text-text-muted">Modifier Key (Super)</span>
+      </div>
+
+      <!-- Bottom Row: Compact Combo Chips -->
+      <div class="flex flex-wrap items-center gap-gutter-xs">
+        <span class="font-label text-label-sm text-text-muted mr-2">combos:</span>
+        <div id="combo-chips-list" class="flex flex-wrap items-center gap-gutter-xs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function playKeySound(type) {
+        if (!soundEnabled) return;
+        try {
+          if (!audioCtx) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            audioCtx = new Ctx();
+          }
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const now = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type === 'layer' ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(type === 'layer' ? 260 : 320, now);
+          osc.frequency.exponentialRampToValueAtTime(type === 'layer' ? 480 : 80, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } catch (e) {}
+      }
+
+      const KEY_POSITIONS = [
+        { pos: 0, x: 0, y: 0.55 }, { pos: 1, x: 1, y: 0.25 }, { pos: 2, x: 2, y: 0.00 }, { pos: 3, x: 3, y: 0.20 }, { pos: 4, x: 4, y: 0.35 },
+        { pos: 5, x: 8.2, y: 0.35 }, { pos: 6, x: 9.2, y: 0.20 }, { pos: 7, x: 10.2, y: 0.00 }, { pos: 8, x: 11.2, y: 0.25 }, { pos: 9, x: 12.2, y: 0.55 },
+        { pos: 10, x: 0, y: 1.55 }, { pos: 11, x: 1, y: 1.25 }, { pos: 12, x: 2, y: 1.00 }, { pos: 13, x: 3, y: 1.20 }, { pos: 14, x: 4, y: 1.35 },
+        { pos: 15, x: 8.2, y: 1.35 }, { pos: 16, x: 9.2, y: 1.20 }, { pos: 17, x: 10.2, y: 1.00 }, { pos: 18, x: 11.2, y: 1.25 }, { pos: 19, x: 12.2, y: 1.55 },
+        { pos: 20, x: 0, y: 2.55 }, { pos: 21, x: 1, y: 2.25 }, { pos: 22, x: 2, y: 2.00 }, { pos: 23, x: 3, y: 2.20 }, { pos: 24, x: 4, y: 2.35 },
+        { pos: 25, x: 8.2, y: 2.35 }, { pos: 26, x: 9.2, y: 2.20 }, { pos: 27, x: 10.2, y: 2.00 }, { pos: 28, x: 11.2, y: 2.25 }, { pos: 29, x: 12.2, y: 2.55 },
+        { pos: 30, x: 2.6, y: 3.35 }, { pos: 31, x: 3.65, y: 3.50 }, { pos: 32, x: 4.7, y: 3.70 },
+        { pos: 33, x: 7.5, y: 3.70 }, { pos: 34, x: 8.55, y: 3.50 }, { pos: 35, x: 9.6, y: 3.35 }
+      ];
+
+      const ENCODERS = [
+        { pos: 36, x: 1.0, y: 4.15, label: 'Play', sub: 'Vol±', raw: '&kp C_PP' },
+        { pos: 37, x: 11.2, y: 4.15, label: 'Mute', sub: 'Track', raw: '&kp C_MUTE' }
+      ];
+
+      const LAYERS = [
+        {
+          id: 0, name: 'default', encoderText: 'encoders: vol± | next/prev',
+          keys: [
+            { tap: 'Q', raw: '&kp Q', type: 'kp' }, { tap: 'W', raw: '&kp W', type: 'kp' }, { tap: 'E', raw: '&kp E', type: 'kp' }, { tap: 'R', raw: '&kp R', type: 'kp' }, { tap: 'T', raw: '&kp T', type: 'kp' },
+            { tap: 'Y', raw: '&kp Y', type: 'kp' }, { tap: 'U', raw: '&kp U', type: 'kp' }, { tap: 'I', raw: '&kp I', type: 'kp' }, { tap: 'O', raw: '&kp O', type: 'kp' }, { tap: 'P', raw: '&kp P', type: 'kp' },
+            { tap: 'A', raw: '&kp A', type: 'kp' }, { tap: 'S', raw: '&kp S', type: 'kp' }, { tap: 'D', raw: '&kp D', type: 'kp' }, { tap: 'F', raw: '&kp F', type: 'kp' }, { tap: 'G', raw: '&kp G', type: 'kp' },
+            { tap: 'H', raw: '&kp H', type: 'kp' }, { tap: 'J', raw: '&kp J', type: 'kp' }, { tap: 'K', raw: '&kp K', type: 'kp' }, { tap: 'L', raw: '&kp L', type: 'kp' }, { tap: ';', raw: '&kp SEMI', type: 'kp' },
+            { tap: 'Z', raw: '&kp Z', type: 'kp' }, { tap: 'X', raw: '&kp X', type: 'kp' }, { tap: 'C', raw: '&kp C', type: 'kp' }, { tap: 'V', raw: '&kp V', type: 'kp' }, { tap: 'B', raw: '&kp B', type: 'kp' },
+            { tap: 'N', raw: '&kp N', type: 'kp' }, { tap: 'M', raw: '&kp M', type: 'kp' }, { tap: ',', raw: '&kp COMMA', type: 'kp' }, { tap: '.', raw: '&kp DOT', type: 'kp' }, { tap: '/', raw: '&kp FSLH', type: 'kp' },
+            { tap: 'Ctrl', raw: '&kp LCTRL', type: 'mod', hold: 'Mod' }, { tap: 'Super', raw: '&kp LGUI', type: 'mod', hold: '◆' }, { tap: 'Shift', raw: '&kp LSHFT', type: 'mod', hold: '⇧' },
+            { tap: 'Space', raw: '&kp SPACE', type: 'kp', hold: '␣' }, { tap: 'Code', raw: '&mo 1', type: 'layer', hold: 'MO', targetLayer: 1 }, { tap: 'Nav', raw: '&mo 2', type: 'layer', hold: 'MO', targetLayer: 2 }
+          ]
+        },
+        {
+          id: 1, name: 'code', encoderText: 'encoders: pgup/pgdn | tab',
+          keys: [
+            { tap: '!', raw: '&kp EXCL', type: 'kp' }, { tap: '@', raw: '&kp AT', type: 'kp' }, { tap: '#', raw: '&kp HASH', type: 'kp' }, { tap: '$', raw: '&kp DLLR', type: 'kp' }, { tap: '%', raw: '&kp PRCNT', type: 'kp' },
+            { tap: '^', raw: '&kp CARET', type: 'kp' }, { tap: '&', raw: '&kp AMPS', type: 'kp' }, { tap: '*', raw: '&kp ASTRK', type: 'kp' }, { tap: '(', raw: '&kp LPAR', type: 'kp' }, { tap: ')', raw: '&kp RPAR', type: 'kp' },
+            { tap: '1', raw: '&kp N1', type: 'kp' }, { tap: '2', raw: '&kp N2', type: 'kp' }, { tap: '3', raw: '&kp N3', type: 'kp' }, { tap: '4', raw: '&kp N4', type: 'kp' }, { tap: '5', raw: '&kp N5', type: 'kp' },
+            { tap: '-', raw: '&kp MINUS', type: 'kp' }, { tap: '=', raw: '&kp EQUAL', type: 'kp' }, { tap: '[', raw: '&kp LBKT', type: 'kp' }, { tap: ']', raw: '&kp RBKT', type: 'kp' }, { tap: '\\', raw: '&kp BSLH', type: 'kp' },
+            { tap: '6', raw: '&kp N6', type: 'kp' }, { tap: '7', raw: '&kp N7', type: 'kp' }, { tap: '8', raw: '&kp N8', type: 'kp' }, { tap: '9', raw: '&kp N9', type: 'kp' }, { tap: '0', raw: '&kp N0', type: 'kp' },
+            { tap: '_', raw: '&kp UNDER', type: 'kp' }, { tap: '+', raw: '&kp PLUS', type: 'kp' }, { tap: '{', raw: '&kp LBRC', type: 'kp' }, { tap: '}', raw: '&kp RBRC', type: 'kp' }, { tap: '|', raw: '&kp PIPE', type: 'kp' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '`', raw: '&kp GRAVE', type: 'kp' }, { tap: 'HELD', raw: '&mo 1', type: 'held' }, { tap: 'Func', raw: '&mo 3', type: 'layer', hold: 'MO', targetLayer: 3 }
+          ]
+        },
+        {
+          id: 2, name: 'nav', encoderText: 'encoders: scroll | undo/redo',
+          keys: [
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: 'PgUp', raw: '&kp PG_UP', type: 'kp' }, { tap: 'Home', raw: '&kp HOME', type: 'kp' }, { tap: '↑', raw: '&kp UP', type: 'kp' }, { tap: 'End', raw: '&kp END', type: 'kp' }, { tap: 'Del', raw: '&kp DEL', type: 'kp' },
+            { tap: 'Ctrl', raw: '&kp LCTRL', type: 'mod' }, { tap: 'Alt', raw: '&kp LALT', type: 'mod' }, { tap: 'Super', raw: '&kp LGUI', type: 'mod' }, { tap: 'Shift', raw: '&kp LSHFT', type: 'mod' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: 'PgDn', raw: '&kp PG_DN', type: 'kp' }, { tap: '←', raw: '&kp LEFT', type: 'kp' }, { tap: '↓', raw: '&kp DOWN', type: 'kp' }, { tap: '→', raw: '&kp RIGHT', type: 'kp' }, { tap: 'Bksp', raw: '&kp BSPC', type: 'kp' },
+            { tap: 'Undo', raw: '&kp LG(Z)', type: 'sys' }, { tap: 'Cut', raw: '&kp LG(X)', type: 'sys' }, { tap: 'Copy', raw: '&kp LG(C)', type: 'sys' }, { tap: 'Paste', raw: '&kp LG(V)', type: 'sys' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: 'Tab', raw: '&kp TAB', type: 'kp' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: 'Func', raw: '&mo 3', type: 'layer', hold: 'MO', targetLayer: 3 }, { tap: 'HELD', raw: '&mo 2', type: 'held' }
+          ]
+        },
+        {
+          id: 3, name: 'func', encoderText: 'encoders: bri± | vol±',
+          keys: [
+            { tap: 'F1', raw: '&kp F1', type: 'kp' }, { tap: 'F2', raw: '&kp F2', type: 'kp' }, { tap: 'F3', raw: '&kp F3', type: 'kp' }, { tap: 'F4', raw: '&kp F4', type: 'kp' }, { tap: 'F5', raw: '&kp F5', type: 'kp' },
+            { tap: 'F6', raw: '&kp F6', type: 'kp' }, { tap: 'F7', raw: '&kp F7', type: 'kp' }, { tap: 'F8', raw: '&kp F8', type: 'kp' }, { tap: 'F9', raw: '&kp F9', type: 'kp' }, { tap: 'F10', raw: '&kp F10', type: 'kp' },
+            { tap: 'Bri-', raw: '&kp C_BRI_DN', type: 'sys' }, { tap: 'Bri+', raw: '&kp C_BRI_UP', type: 'sys' }, { tap: 'Prev', raw: '&kp C_PREV', type: 'sys' }, { tap: 'Play', raw: '&kp C_PP', type: 'sys' }, { tap: 'Next', raw: '&kp C_NEXT', type: 'sys' },
+            { tap: 'Mute', raw: '&kp C_MUTE', type: 'sys' }, { tap: 'Vol-', raw: '&kp C_VOL_DN', type: 'sys' }, { tap: 'Vol+', raw: '&kp C_VOL_UP', type: 'sys' }, { tap: 'F11', raw: '&kp F11', type: 'kp' }, { tap: 'F12', raw: '&kp F12', type: 'kp' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: 'Sett', raw: '&tog 4', type: 'layer', hold: 'TOG', targetLayer: 4 },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: 'HELD', raw: '&mo 1', type: 'held' }, { tap: 'HELD', raw: '&mo 2', type: 'held' }
+          ]
+        },
+        {
+          id: 4, name: 'sett', encoderText: 'encoders: disabled',
+          keys: [
+            { tap: 'BT0', raw: '&bt BT_SEL 0', type: 'sys' }, { tap: 'BT1', raw: '&bt BT_SEL 1', type: 'sys' }, { tap: 'BT2', raw: '&bt BT_SEL 2', type: 'sys' }, { tap: 'BT3', raw: '&bt BT_SEL 3', type: 'sys' }, { tap: 'Clr', raw: '&bt BT_CLR', type: 'sys' },
+            { tap: 'RGB', raw: '&rgb_ug RGB_TOG', type: 'sys' }, { tap: 'Hue+', raw: '&rgb_ug RGB_HUI', type: 'sys' }, { tap: 'Sat+', raw: '&rgb_ug RGB_SAI', type: 'sys' }, { tap: 'Bri+', raw: '&rgb_ug RGB_BRI', type: 'sys' }, { tap: 'Eff', raw: '&rgb_ug RGB_EFF', type: 'sys' },
+            { tap: 'USB', raw: '&out OUT_USB', type: 'sys' }, { tap: 'BLE', raw: '&out OUT_BLE', type: 'sys' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: 'Boot', raw: '&bootloader', type: 'sys' }, { tap: 'Rst', raw: '&sys_reset', type: 'sys' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: 'Base', raw: '&to 0', type: 'layer', hold: 'TO', targetLayer: 0 },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' },
+            { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }, { tap: '▽', raw: '&trans', type: 'trans' }
+          ]
+        }
+      ];
+
+      const COMBOS = [
+        { id: 'tab',    label: '⇥ Tab',    positions: [0, 1],   arcOffset: -20, anchorDy: -18 },
+        { id: 'bksp',   label: '⌫ Bksp',   positions: [12, 13], arcOffset: -18, anchorDy: -18 },
+        { id: 'enter',  label: '↵ Enter',  positions: [16, 17], arcOffset: -18, anchorDy: -18 },
+        { id: 'home',   label: 'Home',     positions: [10, 11], arcOffset: -18, anchorDy: -18 },
+        { id: 'end',    label: 'End',      positions: [18, 19], arcOffset: -18, anchorDy: -18 },
+        { id: 'alt',    label: 'Alt',      positions: [20, 21], arcOffset: -18, anchorDy: 22 },
+        { id: 'cbksp',  label: 'C-⌫ Bksp', positions: [22, 23], arcOffset: -18, anchorDy: 22 },
+        { id: 'quote',  label: "'",        positions: [27, 28], arcOffset: -18, anchorDy: 22 },
+        { id: 'esc',    label: 'Esc',      positions: [0, 2],   arcOffset: -38, anchorDy: -22 },
+        { id: 'capsw',  label: 'CapsW',    positions: [14, 15], arcOffset: -26, anchorDx: [18, -18], anchorDy: 0 }
+      ];
+
+      let activeLayer = 0;
+      const unitSize = 62;
+      let showAllChords = true;
+      let hoveredComboId = null;
+      let searchQuery = '';
+
+      function getKeyCoords(pos) {
+        const kp = KEY_POSITIONS.find(k => k.pos === pos);
+        const gap = 6;
+        const w = unitSize - gap, h = unitSize - gap;
+        const left = kp.x * unitSize, top = kp.y * unitSize;
+        return { left, top, w, h, cx: left + w / 2, cy: top + h / 2 };
+      }
+
+      function renderLayerTabs() {
+        const tablist = document.getElementById('layer-tablist');
+        tablist.innerHTML = '';
+        LAYERS.forEach((layer, idx) => {
+          const isActive = idx === activeLayer;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.role = 'tab';
+          btn.setAttribute('aria-selected', String(isActive));
+          btn.className = isActive
+            ? 'px-3 py-1 rounded-full bg-accent text-on-accent font-mono text-mono-sm transition-colors'
+            : 'px-3 py-1 rounded-full text-text-muted hover:text-on-surface font-mono text-mono-sm transition-colors';
+          btn.textContent = `${idx + 1} ${layer.name}`;
+          btn.addEventListener('click', () => switchLayer(idx));
+          tablist.appendChild(btn);
+        });
+      }
+
+      function switchLayer(idx) {
+        if (idx === activeLayer) return;
+        activeLayer = idx;
+        playKeySound('layer');
+        document.getElementById('stage-layer-title').textContent = `layer ${idx} · ${LAYERS[idx].name}`;
+        document.getElementById('encoder-status-text').textContent = LAYERS[idx].encoderText;
+        renderAll();
+      }
+
+      function renderKeyboard() {
+        const layer = LAYERS[activeLayer];
+        const canvas = document.getElementById('keyboard-canvas');
+        const keysLayer = document.getElementById('keys-layer');
+        canvas.style.width = `${13.2 * unitSize}px`;
+        canvas.style.height = `${5.3 * unitSize}px`;
+        keysLayer.innerHTML = '';
+
+        const highlighted = new Set();
+        if (hoveredComboId) {
+          const c = COMBOS.find(x => x.id === hoveredComboId);
+          if (c) c.positions.forEach(p => highlighted.add(p));
+        }
+
+        KEY_POSITIONS.forEach((kp) => {
+          const keyObj = layer.keys[kp.pos];
+          const coords = getKeyCoords(kp.pos);
+          const isMatch = searchQuery.trim() && (keyObj.tap.toLowerCase().includes(searchQuery.toLowerCase()) || keyObj.raw.toLowerCase().includes(searchQuery.toLowerCase()));
+
+          let cls = 'keycap-3d absolute flex flex-col items-center justify-center rounded border cursor-pointer select-none px-1 ';
+          if (keyObj.type === 'layer') cls += 'bg-layer-bg border-layer-border text-on-layer-bg ';
+          else if (keyObj.type === 'mod') cls += 'bg-mod-bg border-mod-border text-on-mod-bg ';
+          else if (keyObj.type === 'sys') cls += 'bg-sys-bg border-sys-border text-on-sys-bg ';
+          else if (keyObj.type === 'trans') cls += 'bg-transparent border-dashed border-border-strong text-text-muted ';
+          else if (keyObj.type === 'held') cls += 'bg-accent-soft border-accent text-accent-text ';
+          else cls += 'bg-key-bg border-border text-on-key-bg ';
+
+          if (highlighted.has(kp.pos)) cls += 'is-combo-active ';
+          if (isMatch) cls += 'is-search-match ';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.style.left = `${coords.left}px`;
+          btn.style.top = `${coords.top}px`;
+          btn.style.width = `${coords.w}px`;
+          btn.style.height = `${coords.h}px`;
+          btn.className = cls;
+          btn.innerHTML = `
+            <span class="font-mono font-bold ${keyObj.tap.length > 4 ? 'text-[10.5px]' : 'text-[13px]'} leading-tight">${keyObj.tap}</span>
+            ${keyObj.hold ? `<span class="font-mono text-[9px] px-1.5 py-px rounded-sm bg-bg/40 mt-0.5">${keyObj.hold}</span>` : ''}
+          `;
+          btn.addEventListener('mouseenter', () => inspectKey(kp.pos, keyObj));
+          btn.addEventListener('click', () => {
+            playKeySound('key');
+            inspectKey(kp.pos, keyObj);
+            if (keyObj.targetLayer !== undefined) switchLayer(keyObj.targetLayer);
+          });
+          keysLayer.appendChild(btn);
+        });
+
+        ENCODERS.forEach((enc) => {
+          const encSize = unitSize * 0.96;
+          const knob = document.createElement('button');
+          knob.type = 'button';
+          knob.style.left = `${enc.x * unitSize}px`;
+          knob.style.top = `${enc.y * unitSize}px`;
+          knob.style.width = `${encSize}px`;
+          knob.style.height = `${encSize}px`;
+          knob.className = 'encoder-knob absolute rounded-full border border-accent/40 flex flex-col items-center justify-center text-on-surface cursor-pointer';
+          knob.innerHTML = `
+            <span class="w-1 h-2 rounded-full bg-accent mb-0.5"></span>
+            <span class="font-mono text-[11px] font-bold text-accent-text leading-none">${enc.label}</span>
+            <span class="font-mono text-[8px] text-text-muted leading-none mt-0.5">${enc.sub}</span>
+          `;
+          knob.addEventListener('click', () => { playKeySound('key'); inspectKey(enc.pos, { tap: enc.label, raw: enc.raw, type: 'sys', hold: enc.sub }); });
+          keysLayer.appendChild(knob);
+        });
+      }
+
+      function renderComboOverlay() {
+        const svg = document.getElementById('combos-svg');
+        const pills = document.getElementById('combos-pills-layer');
+        svg.innerHTML = '';
+        pills.innerHTML = '';
+
+        const activeCombos = COMBOS.filter(c => hoveredComboId ? c.id === hoveredComboId : showAllChords);
+        activeCombos.forEach((combo) => {
+          const p1 = getKeyCoords(combo.positions[0]);
+          const p2 = getKeyCoords(combo.positions[1]);
+          const dx1 = combo.anchorDx ? combo.anchorDx[0] : 0;
+          const dx2 = combo.anchorDx ? combo.anchorDx[1] : 0;
+          const dy = combo.anchorDy || 0;
+          const ax1 = p1.cx + dx1, ay1 = p1.cy + dy;
+          const ax2 = p2.cx + dx2, ay2 = p2.cy + dy;
+          const midX = (ax1 + ax2) / 2, midY = (ay1 + ay2) / 2 + combo.arcOffset;
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', `M ${ax1} ${ay1} Q ${midX} ${midY} ${ax2} ${ay2}`);
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', '#f97316');
+          path.setAttribute('stroke-width', hoveredComboId === combo.id ? '2.5' : '1.75');
+          path.setAttribute('stroke-dasharray', '4 3');
+          svg.appendChild(path);
+
+          const pillX = 0.25 * ax1 + 0.5 * midX + 0.25 * ax2;
+          const pillY = 0.25 * ay1 + 0.5 * midY + 0.25 * ay2;
+          const pill = document.createElement('div');
+          pill.style.left = `${pillX}px`;
+          pill.style.top = `${pillY}px`;
+          pill.className = 'absolute -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded-full bg-surface border border-accent text-accent-text font-mono text-[10px] font-bold shadow-md whitespace-nowrap';
+          pill.textContent = combo.label;
+          pills.appendChild(pill);
+        });
+      }
+
+      function inspectKey(pos, keyObj) {
+        document.getElementById('inspector-pos-badge').textContent = `${LAYERS[activeLayer].name} · pos ${pos}`;
+        document.getElementById('inspector-raw').textContent = keyObj.raw;
+        document.getElementById('inspector-taphold').textContent = keyObj.hold ? `${keyObj.tap} / ${keyObj.hold}` : keyObj.tap;
+        document.getElementById('inspector-behavior').textContent = keyObj.type === 'layer' ? `momentary layer (${keyObj.tap})` : `key press (${keyObj.tap})`;
+      }
+
+      function renderCombosList() {
+        const list = document.getElementById('combo-chips-list');
+        list.innerHTML = '';
+        COMBOS.forEach((combo) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-2/80 border border-border hover:border-accent font-mono text-mono-sm text-on-surface transition-colors';
+          chip.innerHTML = `<span>${combo.label}</span><span class="text-text-muted">[${combo.positions.join('+')}]</span>`;
+          chip.addEventListener('mouseenter', () => { hoveredComboId = combo.id; renderKeyboard(); renderComboOverlay(); });
+          chip.addEventListener('mouseleave', () => { hoveredComboId = null; renderKeyboard(); renderComboOverlay(); });
+          list.appendChild(chip);
+        });
+      }
+
+      function renderAll() {
+        renderLayerTabs();
+        renderKeyboard();
+        renderComboOverlay();
+        renderCombosList();
+      }
+
+      document.querySelectorAll('#mode-tablist [data-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-mode');
+          playKeySound('layer');
+          document.querySelectorAll('#mode-tablist [data-mode]').forEach((b) => {
+            const active = b.getAttribute('data-mode') === mode;
+            b.setAttribute('aria-selected', String(active));
+            b.className = active
+              ? 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-on-accent font-mono text-mono-sm transition-colors'
+              : 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-text-muted hover:text-on-surface font-mono text-mono-sm transition-colors';
+          });
+          const quizStrip = document.getElementById('zen-quiz-strip');
+          quizStrip.classList.toggle('hidden', mode !== 'quiz');
+          quizStrip.classList.toggle('flex', mode === 'quiz');
+          if (mode === 'combos') {
+            showAllChords = true;
+            renderComboOverlay();
+          }
+        });
+      });
+
+      document.getElementById('key-search-input').addEventListener('input', (e) => { searchQuery = e.target.value; renderKeyboard(); });
+      document.getElementById('btn-show-all-chords').addEventListener('click', (e) => {
+        showAllChords = !showAllChords;
+        e.currentTarget.setAttribute('aria-pressed', String(showAllChords));
+        renderComboOverlay();
+      });
+      document.getElementById('btn-toggle-sound').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById('sound-icon').textContent = soundEnabled ? 'volume_up' : 'volume_off';
+      });
+      document.addEventListener('keydown', (e) => {
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+        const n = Number(e.key);
+        if (n >= 1 && n <= LAYERS.length) switchLayer(n - 1);
+      });
+
+      renderAll();
+      inspectKey(31, LAYERS[0].keys[31]);
+    })();
+  </script>
+
+
+</body></html>

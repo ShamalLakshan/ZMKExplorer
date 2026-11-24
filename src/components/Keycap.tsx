@@ -1,5 +1,4 @@
 import React from 'react';
-import { Disc } from 'lucide-react';
 import { DecodedKey, PhysicalKeyCoord } from '../types';
 
 interface KeycapProps {
@@ -50,20 +49,23 @@ export const Keycap: React.FC<KeycapProps> = ({
   const topPx = ((coord?.y || 0) - minY) * unitSize;
 
   // Class building
-  let classNames = 'keycap key-morph';
-  if (keyData.type === 'layer') classNames += ' type-layer';
-  else if (keyData.type === 'layer-tap') classNames += ' has-layer-hold';
-  else if (keyData.type === 'mod') classNames += ' type-mod';
-  else if (keyData.type === 'mod-only') classNames += ' type-mod-only';
-  else if (keyData.type === 'sys') classNames += ' type-sys';
-  else if (isTrans) classNames += ' type-trans';
-  else if (isNone) classNames += ' type-none';
+  let classNames = isEncoder ? 'encoder-knob' : 'keycap-3d';
 
-  if (isEncoder) classNames += ' is-encoder';
+  if (!isEncoder) {
+    if (keyData.type === 'layer') classNames += ' type-layer';
+    else if (keyData.type === 'layer-tap') classNames += ' has-layer-hold';
+    else if (keyData.type === 'mod') classNames += ' type-mod';
+    else if (keyData.type === 'mod-only') classNames += ' type-mod-only';
+    else if (keyData.type === 'sys') classNames += ' type-sys';
+    else if (isTrans) classNames += ' type-trans';
+    else if (isNone) classNames += ' type-none';
+    else classNames += ' type-normal';
+  }
+
   if (isHeldActivator) classNames += ' held-activator';
   if (isSelected) classNames += ' selected';
-  if (isSearchMatch) classNames += ' search-match';
-  if (isComboHighlighted) classNames += ' combo-highlight';
+  if (isSearchMatch) classNames += ' is-search-match';
+  if (isComboHighlighted) classNames += ' is-combo-active';
 
   if (quizStatus === 'correct') classNames += ' quiz-correct quiz-reveal';
   else if (quizStatus === 'wrong') classNames += ' quiz-wrong quiz-reveal';
@@ -90,23 +92,67 @@ export const Keycap: React.FC<KeycapProps> = ({
     tapText = `▽ ${baseKeyData.tap}`;
   }
 
-  const isSmallTap = tapText.length > 5;
+  const isSmallTap = tapText.length > 4;
 
+  // Render Rotary Encoder Knob
+  if (isEncoder) {
+    return (
+      <button
+        type="button"
+        className={classNames}
+        style={transformStyle}
+        onClick={e => onKeyClick(keyData, e)}
+        onMouseEnter={() => onKeyHover(keyData)}
+        data-pos={keyData.pos}
+      >
+        <span style={{
+          width: '3px',
+          height: '7px',
+          borderRadius: '9999px',
+          backgroundColor: 'var(--accent)',
+          marginBottom: '2px'
+        }} />
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '11px',
+          fontWeight: 700,
+          color: 'var(--accent-text)',
+          lineHeight: 1
+        }}>
+          {keyData.tap || 'Knob'}
+        </span>
+        {keyData.hold && (
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '8px',
+            color: 'var(--text-muted)',
+            lineHeight: 1,
+            marginTop: '2px'
+          }}>
+            {keyData.hold}
+          </span>
+        )}
+      </button>
+    );
+  }
+
+  // Standard Keycap
   return (
-    <div
+    <button
+      type="button"
       className={classNames}
       style={transformStyle}
       onClick={e => onKeyClick(keyData, e)}
       onMouseEnter={() => onKeyHover(keyData)}
       data-pos={keyData.pos}
     >
-      {/* Position index top-left */}
+      {/* Position index badge */}
       {showPos && (
         <span style={{
           position: 'absolute',
-          top: '3px',
-          left: '5px',
-          fontSize: '9px',
+          top: '2px',
+          left: '4px',
+          fontSize: '8px',
           fontFamily: 'var(--font-mono)',
           color: 'var(--text-faint)',
           pointerEvents: 'none',
@@ -116,32 +162,21 @@ export const Keycap: React.FC<KeycapProps> = ({
         </span>
       )}
 
-      {/* Rotary encoder knob decoration */}
-      {isEncoder && (
-        <div className="encoder-knob-indicator" />
-      )}
-
       {/* Tap legend */}
-      <div style={{
-        margin: 'auto 0',
-        textAlign: 'center',
-        width: '100%',
-        padding: '0 2px'
-      }}>
-        <span
-          className="k-tap"
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: isSmallTap ? '10.5px' : '13px',
-            fontWeight: 600,
-            wordBreak: 'break-word',
-            display: 'block',
-            lineHeight: 1.2
-          }}
-        >
-          {tapText || (isNone ? '—' : '')}
-        </span>
-      </div>
+      <span
+        className="k-tap"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: isSmallTap ? '10.5px' : '13px',
+          fontWeight: 700,
+          wordBreak: 'break-word',
+          display: 'block',
+          lineHeight: 1.15,
+          textAlign: 'center'
+        }}
+      >
+        {tapText || (isNone ? '—' : '')}
+      </span>
 
       {/* Hold legend (layer or modifier) */}
       {keyData.hold && (
@@ -149,21 +184,22 @@ export const Keycap: React.FC<KeycapProps> = ({
           className="k-hold"
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: '9px',
+            fontSize: '8.5px',
             fontWeight: 600,
-            padding: '1px 5px',
-            borderRadius: '4px',
+            padding: '1px 4px',
+            borderRadius: '3px',
+            background: 'rgba(0, 0, 0, 0.35)',
             maxWidth: '100%',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            lineHeight: 1.2,
-            marginBottom: '1px'
+            lineHeight: 1.1,
+            marginTop: '2px'
           }}
         >
           {keyData.hold}
         </span>
       )}
-    </div>
+    </button>
   );
 };

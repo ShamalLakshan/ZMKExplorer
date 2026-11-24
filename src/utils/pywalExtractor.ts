@@ -503,4 +503,14 @@ export function applyThemeToCssVariables(theme: ThemeColors) {
   root.style.setProperty('--key-shadow', theme.keyShadow);
   root.style.setProperty('--ok', theme.ok);
   root.style.setProperty('--err', theme.err);
+
+  // Aliases for layout & zen elements
+  root.style.setProperty('--on-bg', theme.text);
+  root.style.setProperty('--on-surface', theme.text);
+  root.style.setProperty('--on-surface-2', theme.text);
+  root.style.setProperty('--on-layer-bg', theme.layerText);
+  root.style.setProperty('--on-mod-bg', theme.modText);
+  root.style.setProperty('--on-sys-bg', theme.sysText);
+  root.style.setProperty('--on-key-bg', theme.text);
+  root.style.setProperty('--on-accent', theme.bg);
 }
