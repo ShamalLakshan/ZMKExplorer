@@ -1,0 +1,387 @@
+/* Cozy Tactile Styling for ZMK Keymap & Layout Explorer */
+
+:root {
+  --bg: #141518;
+  --surface: #1b1d22;
+  --surface-2: #242830;
+  --border: #2d333d;
+  --border-strong: #3f4756;
+  --text: #f0eee6;
+  --text-muted: #9c9990;
+  --text-faint: #636058;
+
+  --accent: #f97316;
+  --accent-soft: #381f13;
+  --accent-text: #fdba74;
+
+  --layer-bg: #16263b;
+  --layer-border: #294c76;
+  --layer-text: #93c5fd;
+
+  --mod-bg: #2d2417;
+  --mod-border: #5b4421;
+  --mod-text: #fcd34d;
+
+  --sys-bg: #2b1c34;
+  --sys-border: #5e3a73;
+  --sys-text: #d8b4fe;
+
+  --key-bg: #1e2229;
+  --key-shadow: #0d0f12;
+  --key-w: 66px;
+  --key-h: 62px;
+  --key-gap: 6px;
+  --radius: 10px;
+
+  --ok: #34d399;
+  --err: #f87171;
+
+  --font-ui: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Background image backdrop with customizable blur & darken */
+#bg-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+#bg-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-color: var(--bg);
+  transition: opacity 0.4s ease;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Glassmorphic Surfaces */
+.glass-panel {
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.glass-card {
+  background: color-mix(in srgb, var(--surface-2) 75%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Buttons & Inputs */
+button, .btn {
+  appearance: none;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+button:hover, .btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+button:active, .btn:active {
+  transform: translateY(1px);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+button.primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+button.active-toggle {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+input[type="text"], input[type="url"], select, textarea {
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* Mechanical Keycaps */
+.keycap {
+  position: absolute;
+  width: var(--key-w);
+  height: var(--key-h);
+  background: var(--key-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 var(--key-shadow), 0 5px 9px rgba(0, 0, 0, 0.2);
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.12s ease, background 0.12s ease;
+  z-index: 2;
+}
+
+.keycap:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--key-shadow), 0 7px 12px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+
+.keycap:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--key-shadow), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.keycap.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 0 var(--key-shadow);
+  z-index: 12;
+}
+
+.keycap.type-layer {
+  background: var(--layer-bg);
+  border-color: var(--layer-border);
+}
+.keycap.type-layer .k-tap, .keycap.type-layer .k-hold {
+  color: var(--layer-text);
+}
+
+.keycap.has-layer-hold .k-hold {
+  background: var(--layer-bg);
+  border: 1px solid var(--layer-border);
+  color: var(--layer-text);
+}
+
+.keycap.type-mod .k-hold, .keycap.type-mod-only {
+  background: var(--mod-bg);
+  border-color: var(--mod-border);
+}
+.keycap.type-mod-only .k-tap, .keycap.type-mod .k-hold {
+  color: var(--mod-text);
+}
+
+.keycap.type-sys {
+  background: var(--sys-bg);
+  border-color: var(--sys-border);
+}
+.keycap.type-sys .k-tap {
+  color: var(--sys-text);
+}
+
+.keycap.type-trans {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--key-shadow) 50%, transparent);
+}
+.keycap.type-trans .k-tap {
+  color: var(--text-faint);
+  opacity: 0.6;
+}
+
+.keycap.type-none {
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
+  border-color: var(--border);
+  opacity: 0.4;
+  box-shadow: none;
+}
+
+/* Rotary Encoder Keycap */
+.keycap.is-encoder {
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: radial-gradient(circle, var(--surface-2) 30%, var(--key-bg) 95%);
+  box-shadow: 0 4px 0 var(--key-shadow), 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.encoder-knob-indicator {
+  position: absolute;
+  top: 4px;
+  width: 4px;
+  height: 9px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Layer change animation */
+@keyframes keyPop {
+  0% { transform: scale(0.92) translateY(2px); opacity: 0.7; }
+  60% { transform: scale(1.04) translateY(-1px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.key-morph {
+  animation: keyPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Activator pulsing glow when looking at a layer */
+@keyframes pulseActivator {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--accent), 0 4px 0 var(--key-shadow);
+  }
+  50% {
+    box-shadow: 0 0 16px 3px var(--accent), 0 4px 0 var(--key-shadow);
+  }
+}
+
+.keycap.held-activator {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  animation: pulseActivator 2s infinite ease-in-out;
+}
+
+.keycap.held-activator::after {
+  content: "HELD";
+  position: absolute;
+  bottom: -16px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--accent-text);
+  letter-spacing: 0.05em;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* Search and Combo Highlights */
+.keycap.search-match {
+  background: #fef08a !important;
+  border-color: #ca8a04 !important;
+  color: #713f12 !important;
+}
+.keycap.search-match .k-tap, .keycap.search-match .k-hold {
+  color: #713f12 !important;
+}
+
+.keycap.combo-highlight {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 14px 2px var(--accent), 0 4px 0 var(--key-shadow) !important;
+  transform: translateY(-2px);
+  z-index: 15;
+}
+
+/* Blind quiz mode */
+.blind-mode .keycap .k-tap,
+.blind-mode .keycap .k-hold {
+  opacity: 0.03;
+}
+.blind-mode .keycap.type-layer .k-tap,
+.blind-mode .keycap.has-layer-hold .k-hold,
+.blind-mode .keycap.held-activator .k-tap,
+.blind-mode .keycap.quiz-reveal .k-tap,
+.blind-mode .keycap.quiz-reveal .k-hold {
+  opacity: 1 !important;
+}
+
+.keycap.quiz-correct {
+  background: var(--ok) !important;
+  border-color: var(--ok) !important;
+  color: #ffffff !important;
+}
+.keycap.quiz-correct .k-tap, .keycap.quiz-correct .k-hold {
+  color: #ffffff !important;
+}
+
+.keycap.quiz-wrong {
+  background: var(--err) !important;
+  border-color: var(--err) !important;
+  color: #ffffff !important;
+  animation: shakeKey 0.3s ease-in-out;
+}
+.keycap.quiz-wrong .k-tap, .keycap.quiz-wrong .k-hold {
+  color: #ffffff !important;
+}
+
+@keyframes shakeKey {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
